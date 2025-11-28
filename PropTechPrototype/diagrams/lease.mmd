@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant User
+    participant UI
+    participant PropertyManager
+    participant DataStore
+    participant LeaseAgreement
+
+    User->>UI: Request new lease (form)
+    UI->>PropertyManager: RegisterNewTenant(form)
+    PropertyManager->>DataStore: AddTenant(...)
+    UI->>PropertyManager: CreateLease(tenantId, propertyId)
+    PropertyManager->>DataStore: GetProperty(propertyId)
+    PropertyManager->>LeaseAgreement: new LeaseAgreement(tenant, property)
+    LeaseAgreement->>PropertyManager: GenerateDocumentHtml(landlord)
+    PropertyManager->>UI: Return lease document

@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant Tenant
+    participant PropertyManager
+    participant Invoice
+    participant PaymentGateway
+    participant DataStore
+
+    PropertyManager->>Invoice: IssueInvoice(lease)
+    Invoice->>Tenant: Send invoice
+    Tenant->>PaymentGateway: Pay(amount)
+    PaymentGateway-->>PropertyManager: Payment success/failure
+    alt success
+        PropertyManager->>DataStore: Record payment
+        PropertyManager->>Tenant: Send receipt
+    else failure
+        PropertyManager->>Tenant: Notify failure
+    end
