@@ -65,9 +65,42 @@ classDiagram
 
     class PropertyManager {
       -DataStore store
-      +RegisterNewTenant(data)
-      +CreateLease(tenantId, propertyId)
-      +IssueInvoice(leaseId)
+      -AIPropertyAgent aiAgent
+      +RegisterNewTenantAsync(fullName)
+      +CreateLeaseAsync(tenantId, propertyId)
+      +GetPricingRecommendationAsync(propertyId)
+      +GetMaintenancePredictionAsync(propertyId)
+    }
+
+    class AIConfiguration {
+      +string Region
+      +string ProjectId
+      +string PanguModelId
+      +bool IsEnabled
+      +CreateDemo(): AIConfiguration
+    }
+
+    class HuaweiAIService {
+      -AIConfiguration config
+      +GetAuthTokenAsync(): string
+      +GenerateTextAsync(prompt): string
+      +PredictAsync(modelId, features): Dictionary
+    }
+
+    class AIPropertyAgent {
+      -HuaweiAIService aiService
+      -DataStore dataStore
+      +ScreenTenantAsync(tenant): TenantScreeningResult
+      +RecommendRentalPriceAsync(property): RentalPricingRecommendation
+      +PredictMaintenanceAsync(property): MaintenancePrediction
+      +GenerateLeaseClauseAsync(property, tenant, clauseType): string
+      +RunPortfolioAnalysisAsync(): List~AIInsight~
+    }
+
+    class AIInsight {
+      +InsightCategory Category
+      +string Title
+      +double ConfidenceScore
     }
 
     DataStore "1" -- "1" Landlord : manages
@@ -78,4 +111,8 @@ classDiagram
     LeaseAgreement "1" -- "1" Tenant : has
     LeaseAgreement "1" -- "1" Property : has
     PropertyManager "1" -- "1" DataStore : uses
+    PropertyManager "1" -- "1" AIPropertyAgent : uses
+    AIPropertyAgent "1" -- "1" HuaweiAIService : uses
+    AIPropertyAgent "1" -- "1" DataStore : reads
+    HuaweiAIService "1" -- "1" AIConfiguration : configured-by
     Invoice "1" -- "1" Tenant : billed-to

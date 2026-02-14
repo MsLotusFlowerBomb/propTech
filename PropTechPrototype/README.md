@@ -6,6 +6,29 @@ The project you are creating is a **PropTech (Property Technology) Web Applicati
 
 **AI-Powered:** The platform integrates **Huawei Cloud AI** (Pangu large language models via ModelArts) to deliver intelligent, agentic property management capabilities including automated tenant screening, rental pricing optimisation, predictive maintenance, and AI-generated lease clauses.
 
+## Framework Choice: ASP.NET Core Blazor (not .NET MAUI)
+
+**.NET MAUI was evaluated but is not suitable** for this PropTech platform:
+
+| Consideration | .NET MAUI | ASP.NET Core Blazor ✅ |
+|---|---|---|
+| **Accessibility** | Requires app store installation per platform | Works in any browser on any device |
+| **Target users** | Single-user mobile/desktop apps | Multi-user web platform (landlords, tenants, agents) |
+| **Platform SDKs** | Needs Android SDK, Xcode (macOS), Windows SDK | Runs on any OS including Linux servers |
+| **South African market** | Limited by device capabilities and app stores | Web-first is ideal for broad device accessibility |
+| **Document generation** | Complex to render HTML documents | Native HTML rendering for lease agreements |
+| **Deployment** | Separate builds per platform | Single deployment serves all users |
+
+**ASP.NET Core Blazor** was selected as the best .NET framework because it:
+- Uses the **same C# codebase and .NET ecosystem** as the original prototype
+- Provides **interactive server-side rendering** for real-time AI-powered UI updates
+- Runs on **all devices via browser** — no app store needed
+- Supports **Bootstrap** for responsive, mobile-friendly layouts
+- Can be extended to a **Progressive Web App (PWA)** for native-like mobile experience
+- Deploys to **Linux servers** including Huawei Cloud Elastic Cloud Server (ECS)
+
+The Blazor web application is in the `PropTechWeb/` directory. The original console prototype remains in `PropTechPrototype/`.
+
 Here is the comprehensive plan, project structure, and detailed iteration breakdown.
 
 ## I. PropMate Program Description and Architecture

@@ -1,6 +1,6 @@
 # PropTech Prototype — Diagrams
 
-Below are Mermaid diagrams that represent the main domain classes and two typical flows: lease generation and invoicing/payment.
+Below are Mermaid diagrams that represent the main domain classes, AI services, and typical flows: lease generation, invoicing/payment, and AI-powered workflows.
 
 ## Class Diagram (Mermaid)
 
@@ -72,9 +72,42 @@ classDiagram
 
     class PropertyManager {
       -DataStore store
-      +RegisterNewTenant(data)
-      +CreateLease(tenantId, propertyId)
-      +IssueInvoice(leaseId)
+      -AIPropertyAgent aiAgent
+      +RegisterNewTenantAsync(fullName)
+      +CreateLeaseAsync(tenantId, propertyId)
+      +GetPricingRecommendationAsync(propertyId)
+      +GetMaintenancePredictionAsync(propertyId)
+    }
+
+    class AIConfiguration {
+      +string Region
+      +string ProjectId
+      +string PanguModelId
+      +bool IsEnabled
+      +CreateDemo(): AIConfiguration
+    }
+
+    class HuaweiAIService {
+      -AIConfiguration config
+      +GetAuthTokenAsync(): string
+      +GenerateTextAsync(prompt): string
+      +PredictAsync(modelId, features): Dictionary
+    }
+
+    class AIPropertyAgent {
+      -HuaweiAIService aiService
+      -DataStore dataStore
+      +ScreenTenantAsync(tenant): TenantScreeningResult
+      +RecommendRentalPriceAsync(property): RentalPricingRecommendation
+      +PredictMaintenanceAsync(property): MaintenancePrediction
+      +GenerateLeaseClauseAsync(property, tenant, clauseType): string
+      +RunPortfolioAnalysisAsync(): List~AIInsight~
+    }
+
+    class AIInsight {
+      +InsightCategory Category
+      +string Title
+      +double ConfidenceScore
     }
 
     DataStore "1" -- "1" Landlord : manages
@@ -85,6 +118,10 @@ classDiagram
     LeaseAgreement "1" -- "1" Tenant : has
     LeaseAgreement "1" -- "1" Property : has
     PropertyManager "1" -- "1" DataStore : uses
+    PropertyManager "1" -- "1" AIPropertyAgent : uses
+    AIPropertyAgent "1" -- "1" HuaweiAIService : uses
+    AIPropertyAgent "1" -- "1" DataStore : reads
+    HuaweiAIService "1" -- "1" AIConfiguration : configured-by
     Invoice "1" -- "1" Tenant : billed-to
 
 ```
@@ -108,6 +145,39 @@ sequenceDiagram
     LeaseAgreement->>PropertyManager: GenerateDocumentHtml(landlord)
     PropertyManager->>UI: Return lease document
 
+```
+
+## Sequence Diagram (Mermaid) — AI-Powered Tenant Screening & Lease Creation
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant PropertyManager
+    participant AIPropertyAgent
+    participant HuaweiAIService
+    participant HuaweiCloud as Huawei Cloud (Pangu/ModelArts)
+    participant DataStore
+
+    User->>PropertyManager: RegisterNewTenantAsync(name)
+    PropertyManager->>DataStore: AddTenant(tenant)
+    PropertyManager->>AIPropertyAgent: ScreenTenantAsync(tenant)
+    AIPropertyAgent->>HuaweiAIService: GenerateTextAsync(screening prompt)
+    HuaweiAIService->>HuaweiCloud: POST /predict (Pangu LLM)
+    HuaweiCloud-->>HuaweiAIService: NLP analysis response
+    AIPropertyAgent->>HuaweiAIService: PredictAsync(risk model, features)
+    HuaweiAIService->>HuaweiCloud: POST /predict (ModelArts)
+    HuaweiCloud-->>HuaweiAIService: Risk scores
+    AIPropertyAgent-->>PropertyManager: TenantScreeningResult
+    PropertyManager-->>User: Tenant + Screening result
+
+    User->>PropertyManager: CreateLeaseAsync(tenantId, propertyId)
+    PropertyManager->>AIPropertyAgent: GenerateLeaseClauseAsync(property, tenant, clauseType)
+    AIPropertyAgent->>HuaweiAIService: GenerateTextAsync(clause prompt)
+    HuaweiAIService->>HuaweiCloud: POST /predict (Pangu LLM)
+    HuaweiCloud-->>HuaweiAIService: Generated clause text
+    AIPropertyAgent-->>PropertyManager: AI-generated lease clause
+    PropertyManager->>DataStore: AddLease(lease)
+    PropertyManager-->>User: Lease + AI clause
 ```
 
 ## Sequence Diagram (Mermaid) — Invoice & Payment Flow
