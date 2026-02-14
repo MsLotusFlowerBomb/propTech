@@ -26,4 +26,8 @@
         <ShellContent ContentTemplate="{DataTemplate pages:MaintenancePage}" Route="maintenance" />
     </FlyoutItem>
 
+    <FlyoutItem Title="360° Tours" Icon="{x:Null}">
+        <ShellContent ContentTemplate="{DataTemplate pages:VirtualToursPage}" Route="virtual-tours" />
+    </FlyoutItem>
+
 </Shell>

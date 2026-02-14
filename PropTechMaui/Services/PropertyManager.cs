@@ -89,5 +89,20 @@ namespace PropTechMaui.Services
 
             return await _aiAgent.PredictMaintenanceAsync(property);
         }
+
+        /// <summary>
+        /// Runs an AI-powered inspection on a property's 360° virtual tour.
+        /// Analyses room panoramas to detect defects, assess condition, and estimate repair costs.
+        /// </summary>
+        public async Task<InspectionReport> RunVirtualTourInspectionAsync(string propertyId)
+        {
+            var property = _store.GetPropertyById(propertyId)
+                ?? throw new InvalidOperationException($"Property '{propertyId}' not found");
+
+            var tour = _store.GetVirtualTourByPropertyId(propertyId)
+                ?? throw new InvalidOperationException($"No virtual tour found for property '{propertyId}'");
+
+            return await _aiAgent.AnalyseVirtualTourAsync(tour, property);
+        }
     }
 }

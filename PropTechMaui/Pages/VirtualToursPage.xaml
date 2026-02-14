@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PropTechMaui.Pages.VirtualToursPage"
+             Title="360° Tours">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="🔄 360° Virtual Tours &amp; AI Inspection" Style="{StaticResource Headline}" />
+            <Label Text="View room panoramas and run AI-powered property inspections."
+                   Style="{StaticResource SubHeadline}" />
+
+            <CollectionView x:Name="ToursList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding PropertyId}" FontAttributes="Bold" VerticalOptions="Center" Grid.Column="0" />
+                                <Label Text="{Binding Address}" VerticalOptions="Center" Grid.Column="1" />
+                                <Label Text="{Binding RoomCount}" VerticalOptions="Center" Grid.Column="2" />
+                                <Button Text="🔄 View" Style="{StaticResource WarningButton}"
+                                        CommandParameter="{Binding PropertyId}" Clicked="OnViewTour" Grid.Column="3" />
+                                <Button Text="🤖 Inspect" 
+                                        CommandParameter="{Binding PropertyId}" Clicked="OnRunInspection" Grid.Column="4" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label x:Name="TourHeader" Text="" FontAttributes="Bold" FontSize="16" IsVisible="False" />
+            <CollectionView x:Name="RoomsList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding RoomName}" FontAttributes="Bold" FontSize="14" />
+                                <Label Text="{Binding Description}" FontSize="13" />
+                                <Label Text="{Binding PanoramaUrl}" TextColor="{StaticResource TextSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Frame x:Name="InspectionFrame" Style="{StaticResource CardFrame}" IsVisible="False">
+                <VerticalStackLayout Spacing="4">
+                    <Label x:Name="InspectionTitle" FontAttributes="Bold" FontSize="16" />
+                    <Label x:Name="InspectionCondition" />
+                    <Label x:Name="InspectionScore" />
+                    <Label x:Name="InspectionCost" />
+                    <Label x:Name="InspectionConfidence" TextColor="{StaticResource TextSecondary}" />
+                    <Label x:Name="InspectionFindings" FontSize="13" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

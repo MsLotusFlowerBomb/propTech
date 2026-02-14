@@ -36,7 +36,8 @@ namespace PropTechMaui.Models
         MaintenancePrediction,
         LeaseRecommendation,
         OccupancyForecast,
-        RiskAssessment
+        RiskAssessment,
+        VirtualTourInspection
     }
 
     /// <summary>

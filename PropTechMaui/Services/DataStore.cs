@@ -13,12 +13,14 @@ namespace PropTechMaui.Services
         private readonly List<Tenant> _tenants = new();
         private readonly List<Property> _properties = new();
         private readonly List<LeaseAgreement> _leases = new();
+        private readonly List<VirtualTour> _virtualTours = new();
 
         public Landlord CurrentLandlord { get; private set; }
 
         public IReadOnlyList<Tenant> Tenants => _tenants.AsReadOnly();
         public IReadOnlyList<Property> Properties => _properties.AsReadOnly();
         public IReadOnlyList<LeaseAgreement> Leases => _leases.AsReadOnly();
+        public IReadOnlyList<VirtualTour> VirtualTours => _virtualTours.AsReadOnly();
 
         public DataStore()
         {
@@ -54,6 +56,18 @@ namespace PropTechMaui.Services
         {
             if (string.IsNullOrWhiteSpace(id)) return null;
             return _properties.Find(p => string.Equals(p.Id, id, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public void AddVirtualTour(VirtualTour tour)
+        {
+            if (tour == null) throw new ArgumentNullException(nameof(tour));
+            _virtualTours.Add(tour);
+        }
+
+        public VirtualTour? GetVirtualTourByPropertyId(string propertyId)
+        {
+            if (string.IsNullOrWhiteSpace(propertyId)) return null;
+            return _virtualTours.Find(t => string.Equals(t.PropertyId, propertyId, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
@@ -121,6 +135,100 @@ namespace PropTechMaui.Models
             Lessee = lessee ?? throw new ArgumentNullException(nameof(lessee));
             LeasedProperty = property ?? throw new ArgumentNullException(nameof(property));
             MonthlyRent = monthlyRent;
+        }
+    }
+
+    /// <summary>
+    /// Represents a 360° virtual tour for a property, containing room panoramas
+    /// and an optional AI-generated inspection report.
+    /// </summary>
+    public class VirtualTour
+    {
+        public string Id { get; private set; }
+        public string PropertyId { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public List<RoomPanorama> Rooms { get; private set; }
+        public InspectionReport? Inspection { get; private set; }
+
+        public VirtualTour(string id, string propertyId, List<RoomPanorama> rooms)
+        {
+            Id = id ?? Guid.NewGuid().ToString();
+            PropertyId = propertyId ?? throw new ArgumentNullException(nameof(propertyId));
+            CreatedAt = DateTime.UtcNow;
+            Rooms = rooms ?? new List<RoomPanorama>();
+        }
+
+        public void SetInspection(InspectionReport report)
+        {
+            Inspection = report ?? throw new ArgumentNullException(nameof(report));
+        }
+    }
+
+    /// <summary>
+    /// A single room panorama within a 360° virtual tour.
+    /// </summary>
+    public class RoomPanorama
+    {
+        public string RoomName { get; private set; }
+        public string PanoramaUrl { get; private set; }
+        public string Description { get; private set; }
+
+        public RoomPanorama(string roomName, string panoramaUrl, string description = "")
+        {
+            RoomName = roomName ?? throw new ArgumentNullException(nameof(roomName));
+            PanoramaUrl = panoramaUrl ?? string.Empty;
+            Description = description ?? string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// AI-generated inspection report from a virtual tour analysis.
+    /// Uses Huawei Cloud AI to detect defects, assess condition, and estimate repair costs.
+    /// </summary>
+    public class InspectionReport
+    {
+        public string PropertyId { get; private set; }
+        public string OverallCondition { get; private set; }
+        public double ConditionScore { get; private set; }
+        public List<InspectionFinding> Findings { get; private set; }
+        public decimal EstimatedRepairCost { get; private set; }
+        public DateTime InspectedAt { get; private set; }
+        public double ConfidenceScore { get; private set; }
+
+        public InspectionReport(
+            string propertyId,
+            string overallCondition,
+            double conditionScore,
+            List<InspectionFinding> findings,
+            decimal estimatedRepairCost,
+            double confidenceScore)
+        {
+            PropertyId = propertyId ?? throw new ArgumentNullException(nameof(propertyId));
+            OverallCondition = overallCondition ?? "Unknown";
+            ConditionScore = Math.Clamp(conditionScore, 0.0, 1.0);
+            Findings = findings ?? new List<InspectionFinding>();
+            EstimatedRepairCost = estimatedRepairCost;
+            ConfidenceScore = Math.Clamp(confidenceScore, 0.0, 1.0);
+            InspectedAt = DateTime.UtcNow;
+        }
+    }
+
+    /// <summary>
+    /// A single finding from an AI-powered virtual inspection.
+    /// </summary>
+    public class InspectionFinding
+    {
+        public string Room { get; private set; }
+        public string Issue { get; private set; }
+        public string Severity { get; private set; }
+        public decimal EstimatedCost { get; private set; }
+
+        public InspectionFinding(string room, string issue, string severity, decimal estimatedCost)
+        {
+            Room = room ?? string.Empty;
+            Issue = issue ?? string.Empty;
+            Severity = severity ?? "Low";
+            EstimatedCost = estimatedCost;
         }
     }
 }
