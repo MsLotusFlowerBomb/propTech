@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:pages="clr-namespace:PropTechMaui.Pages"
+       x:Class="PropTechMaui.AppShell"
+       Shell.FlyoutBehavior="Flyout"
+       Title="PropMate AI">
+
+    <FlyoutItem Title="Dashboard" Icon="{x:Null}">
+        <ShellContent ContentTemplate="{DataTemplate pages:DashboardPage}" Route="dashboard" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Properties" Icon="{x:Null}">
+        <ShellContent ContentTemplate="{DataTemplate pages:PropertiesPage}" Route="properties" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Tenants" Icon="{x:Null}">
+        <ShellContent ContentTemplate="{DataTemplate pages:TenantsPage}" Route="tenants" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Leases" Icon="{x:Null}">
+        <ShellContent ContentTemplate="{DataTemplate pages:LeasesPage}" Route="leases" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Maintenance" Icon="{x:Null}">
+        <ShellContent ContentTemplate="{DataTemplate pages:MaintenancePage}" Route="maintenance" />
+    </FlyoutItem>
+
+</Shell>

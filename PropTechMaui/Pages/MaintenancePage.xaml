@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PropTechMaui.Pages.MaintenancePage"
+             Title="Maintenance">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="🔧 Predictive Maintenance" Style="{StaticResource Headline}" />
+            <Label Text="AI-powered maintenance predictions to prevent issues before they occur."
+                   Style="{StaticResource SubHeadline}" />
+
+            <!-- Properties List -->
+            <CollectionView x:Name="PropertiesList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding Id}" FontAttributes="Bold" VerticalOptions="Center" Grid.Column="0" />
+                                <Label Text="{Binding Address}" VerticalOptions="Center" Grid.Column="1" />
+                                <Button Text="🔧 Predict" Style="{StaticResource WarningButton}"
+                                        CommandParameter="{Binding Id}" Clicked="OnPredictMaintenance" Grid.Column="2" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Predictions -->
+            <Label x:Name="PredictionsHeader" Text="AI Maintenance Predictions"
+                   FontAttributes="Bold" FontSize="16" IsVisible="False" />
+
+            <CollectionView x:Name="PredictionsList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding Header}" FontAttributes="Bold" FontSize="14" />
+                                <Label Text="{Binding UrgencyText}" />
+                                <Label Text="{Binding CostText}" />
+                                <Label Text="{Binding DaysText}" />
+                                <Label Text="{Binding Issue}" TextColor="{StaticResource TextSecondary}" />
+                                <Label Text="{Binding ConfidenceText}" TextColor="{StaticResource TextSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

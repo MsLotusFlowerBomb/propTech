@@ -6,28 +6,34 @@ The project you are creating is a **PropTech (Property Technology) Web Applicati
 
 **AI-Powered:** The platform integrates **Huawei Cloud AI** (Pangu large language models via ModelArts) to deliver intelligent, agentic property management capabilities including automated tenant screening, rental pricing optimisation, predictive maintenance, and AI-generated lease clauses.
 
-## Framework Choice: ASP.NET Core Blazor (not .NET MAUI)
+## Framework Strategy: .NET MAUI (Desktop) + ASP.NET Core Blazor (Web)
 
-**.NET MAUI was evaluated but is not suitable** for this PropTech platform:
+This project uses **both .NET MAUI and ASP.NET Core Blazor** — each for its strength:
 
-| Consideration | .NET MAUI | ASP.NET Core Blazor ✅ |
+| Capability | .NET MAUI Desktop ✅ | ASP.NET Core Blazor ✅ |
 |---|---|---|
-| **Accessibility** | Requires app store installation per platform | Works in any browser on any device |
-| **Target users** | Single-user mobile/desktop apps | Multi-user web platform (landlords, tenants, agents) |
-| **Platform SDKs** | Needs Android SDK, Xcode (macOS), Windows SDK | Runs on any OS including Linux servers |
-| **South African market** | Limited by device capabilities and app stores | Web-first is ideal for broad device accessibility |
-| **Document generation** | Complex to render HTML documents | Native HTML rendering for lease agreements |
-| **Deployment** | Separate builds per platform | Single deployment serves all users |
+| **Platform** | Native **Windows desktop app** (also supports Android, iOS, macOS) | Web application accessible from any browser |
+| **Best for** | Property managers who want a fast, native desktop experience | Tenants, agents, and remote access from any device |
+| **Offline support** | Runs natively, can work offline | Requires server connection |
+| **Performance** | Native UI controls, fast startup, full OS integration | Server-rendered or WebAssembly, browser-dependent |
+| **Installation** | Installed on Windows (no app store required for sideloading) | No installation — just open a URL |
+| **AI integration** | Same Huawei Cloud AI services (shared C# codebase) | Same Huawei Cloud AI services (shared C# codebase) |
 
-**ASP.NET Core Blazor** was selected as the best .NET framework because it:
-- Uses the **same C# codebase and .NET ecosystem** as the original prototype
-- Provides **interactive server-side rendering** for real-time AI-powered UI updates
-- Runs on **all devices via browser** — no app store needed
-- Supports **Bootstrap** for responsive, mobile-friendly layouts
-- Can be extended to a **Progressive Web App (PWA)** for native-like mobile experience
-- Deploys to **Linux servers** including Huawei Cloud Elastic Cloud Server (ECS)
+### Why both?
 
-The Blazor web application is in the `PropTechWeb/` directory. The original console prototype remains in `PropTechPrototype/`.
+- **.NET MAUI** is ideal for the **property manager's daily workflow** on a Windows desktop — fast native app with taskbar integration, system notifications, and offline capability.
+- **ASP.NET Core Blazor** provides **browser-based access** for tenants checking statements, agents accessing the platform remotely, and scenarios where installing an app isn't practical.
+- Both share the **same Models and Services** (DataStore, PropertyManager, HuaweiAIService, AIPropertyAgent) — the business logic and AI integration are written once in C# and reused across both interfaces.
+
+### Project layout
+
+| Directory | Framework | Purpose |
+|---|---|---|
+| `PropTechPrototype/` | .NET Console | Original CLI prototype |
+| `PropTechMaui/` | .NET MAUI | Native **Windows desktop** application |
+| `PropTechWeb/` | ASP.NET Core Blazor | Web application (browser-based) |
+
+> **Building the MAUI app:** Open `PropTechMaui/PropTechMaui.csproj` in Visual Studio 2022+ on Windows and select the **Windows Machine** target. The MAUI workload must be installed via the Visual Studio Installer.
 
 Here is the comprehensive plan, project structure, and detailed iteration breakdown.
 
@@ -140,30 +146,34 @@ classDiagram
 
 ## III. Iterative Development Plan and Guide
 
-### A. Project Structure Suggestion
+### A. Project Structure
 
-For a C\# console or web application prototype, this structure is recommended.
+The shared Models/Services architecture is used by all three project interfaces:
 
 ```text
-PropMateProject/
-├── Models/                 (The core data classes)
-│   ├── Landlord.cs
-│   ├── Tenant.cs
-│   ├── Property.cs         (Base/Abstract Class)
-│   ├── Room.cs             (Concrete Class - V1 Focus)
-│   ├── LeaseAgreement.cs
-│   ├── FinancialTransaction.cs (Base/Abstract Class)
-│   ├── Invoice.cs
-│   ├── AIConfiguration.cs  (Huawei Cloud AI settings)
-│   └── AIInsight.cs        (AI result models: screening, pricing, maintenance)
-├── Services/               (The business logic and data access)
-│   ├── DataStore.cs        (In-memory storage and retrieval)
-│   ├── PropertyManager.cs  (Main application controller with AI integration)
-│   ├── HuaweiAIService.cs  (Huawei Cloud Pangu/ModelArts API client)
-│   └── AIPropertyAgent.cs  (Agentic AI orchestrator for property decisions)
-├── Templates/              (The source of your lease HTML/text)
-│   └── RoomLeaseTemplate.html
-└── Program.cs              (The application entry point)
+propTech/
+├── PropTechPrototype/      (Console prototype — original CLI demo)
+│   ├── Models/
+│   ├── Services/
+│   ├── Templates/
+│   └── Program.cs
+│
+├── PropTechMaui/           (.NET MAUI — native Windows desktop app)
+│   ├── Models/             (Shared AI models)
+│   ├── Services/           (Shared AI services)
+│   ├── Pages/              (XAML pages: Dashboard, Properties, Tenants, Leases, Maintenance)
+│   ├── Resources/          (Styles, Colors)
+│   ├── MauiProgram.cs      (DI + service registration)
+│   └── AppShell.xaml       (Navigation shell)
+│
+├── PropTechWeb/            (Blazor — web application)
+│   ├── Models/             (Shared AI models)
+│   ├── Services/           (Shared AI services)
+│   ├── Components/Pages/   (Razor pages: Dashboard, Properties, Tenants, Leases, Maintenance)
+│   └── Program.cs          (DI + service registration)
+│
+├── PropManagement system.pdf
+└── Tenant_Information_Form_Updated.docx
 
 ```
 

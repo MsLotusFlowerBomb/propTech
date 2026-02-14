@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PropTechMaui.Pages.LeasesPage"
+             Title="Leases">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="📄 Leases" Style="{StaticResource Headline}" />
+            <Label Text="Create lease agreements with AI-generated clauses compliant with the SA Rental Housing Act."
+                   Style="{StaticResource SubHeadline}" />
+
+            <!-- Create Lease Form -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Create New Lease" FontAttributes="Bold" FontSize="16" />
+                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
+                        <Picker x:Name="TenantPicker" Title="Select Tenant" Grid.Column="0" />
+                        <Picker x:Name="PropertyPicker" Title="Select Property" Grid.Column="1" />
+                        <Button x:Name="CreateLeaseButton" Text="Create Lease with AI Clause"
+                                Style="{StaticResource SuccessButton}" Clicked="OnCreateLease" Grid.Column="2" />
+                    </Grid>
+                    <ActivityIndicator x:Name="LeaseIndicator" IsVisible="False" IsRunning="False"
+                                       Color="{StaticResource Primary}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Error message -->
+            <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" IsVisible="False" />
+
+            <!-- AI Clause Result -->
+            <Frame x:Name="ClauseResultFrame" Style="{StaticResource CardFrame}" IsVisible="False"
+                   BorderColor="{StaticResource Accent}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="🤖 AI-Generated Lease Clause" FontAttributes="Bold" FontSize="16" />
+                    <Label x:Name="ClauseText" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Active Leases List -->
+            <Label Text="Active Leases" FontAttributes="Bold" FontSize="16" />
+            <CollectionView x:Name="LeasesList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <Grid ColumnDefinitions="2*,2*,2*,*" ColumnSpacing="12">
+                                <Label Text="{Binding LeaseId}" FontSize="12" TextColor="{StaticResource TextSecondary}"
+                                       VerticalOptions="Center" Grid.Column="0" />
+                                <Label Text="{Binding TenantName}" VerticalOptions="Center" Grid.Column="1" />
+                                <Label Text="{Binding PropertyAddress}" VerticalOptions="Center" Grid.Column="2" />
+                                <Label Text="{Binding RentDisplay}" FontAttributes="Bold"
+                                       VerticalOptions="Center" Grid.Column="3" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label x:Name="EmptyLeaseMessage" Text="No leases created yet."
+                   TextColor="{StaticResource TextSecondary}" IsVisible="True" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
