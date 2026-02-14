@@ -1,0 +1,251 @@
+@page "/virtual-tours"
+@using PropTechWeb.Models
+@using PropTechWeb.Services
+@inject DataStore DataStore
+@inject PropertyManager Manager
+@rendermode InteractiveServer
+
+<PageTitle>360° Virtual Tours — PropMate AI</PageTitle>
+
+<h2>🔄 360° Virtual Tours &amp; AI Inspection</h2>
+<p>View 360° room panoramas and run AI-powered property inspections using Huawei Cloud vision analysis.</p>
+
+<h4>Properties with Virtual Tours</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Address</th>
+            <th>Rooms</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prop in DataStore.Properties)
+        {
+            var tour = DataStore.GetVirtualTourByPropertyId(prop.Id);
+            <tr>
+                <td>@prop.Id</td>
+                <td>@prop.Address</td>
+                <td>
+                    @if (tour != null)
+                    {
+                        <span class="badge bg-success">@tour.Rooms.Count rooms</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">No tour</span>
+                    }
+                </td>
+                <td>
+                    @if (tour?.Inspection != null)
+                    {
+                        <span class="badge @GetConditionBadge(tour.Inspection.OverallCondition)">
+                            Inspected — @tour.Inspection.OverallCondition
+                        </span>
+                    }
+                    else if (tour != null)
+                    {
+                        <span class="badge bg-warning text-dark">Tour ready</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+                <td>
+                    @if (tour != null)
+                    {
+                        <button class="btn btn-sm btn-outline-info me-1" @onclick="() => ViewTour(prop.Id)">
+                            🔄 View Tour
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => RunInspection(prop.Id)"
+                                disabled="@_isInspecting">
+                            🤖 AI Inspect
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No tour available</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (_isInspecting)
+{
+    <div class="text-center my-3">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Running AI inspection on 360° panoramas...</p>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-warning" role="alert">@_errorMessage</div>
+}
+
+@* ── 360° Tour Viewer ── *@
+@if (_selectedTour != null && _selectedProperty != null)
+{
+    <div class="card border-info mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">🔄 360° Virtual Tour — @_selectedProperty.Address</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @foreach (var room in _selectedTour.Rooms)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="bg-light rounded p-4 mb-2" style="min-height:180px;display:flex;align-items:center;justify-content:center;">
+                                    <div>
+                                        <span style="font-size:3rem;">🔄</span>
+                                        <br />
+                                        <strong>@room.RoomName</strong>
+                                        <br />
+                                        <small class="text-muted">360° Panorama</small>
+                                    </div>
+                                </div>
+                                <p class="card-text small">@room.Description</p>
+                                @if (!string.IsNullOrEmpty(room.PanoramaUrl))
+                                {
+                                    <small class="text-muted">📷 @room.PanoramaUrl</small>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <small class="text-muted">Tour created: @_selectedTour.CreatedAt.ToString("dd MMM yyyy HH:mm")</small>
+        </div>
+    </div>
+}
+
+@* ── AI Inspection Report ── *@
+@if (_inspectionReport != null)
+{
+    <div class="card border-primary mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">🤖 AI Inspection Report — @_inspectionPropertyAddress</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6>Overall Condition</h6>
+                            <span class="badge @GetConditionBadge(_inspectionReport.OverallCondition) fs-6">
+                                @_inspectionReport.OverallCondition
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6>Condition Score</h6>
+                            <span class="display-6">@_inspectionReport.ConditionScore.ToString("P0")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6>Repair Estimate</h6>
+                            <span class="display-6">R @_inspectionReport.EstimatedRepairCost.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6>AI Confidence</h6>
+                            <span class="display-6">@_inspectionReport.ConfidenceScore.ToString("P0")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h6>Findings (@_inspectionReport.Findings.Count)</h6>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Issue</th>
+                        <th>Severity</th>
+                        <th>Est. Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var finding in _inspectionReport.Findings)
+                    {
+                        <tr>
+                            <td>@finding.Room</td>
+                            <td>@finding.Issue</td>
+                            <td><span class="badge @GetSeverityBadge(finding.Severity)">@finding.Severity</span></td>
+                            <td>R @finding.EstimatedCost.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <small class="text-muted">Inspected: @_inspectionReport.InspectedAt.ToString("dd MMM yyyy HH:mm")</small>
+        </div>
+    </div>
+}
+
+@code {
+    private VirtualTour? _selectedTour;
+    private Property? _selectedProperty;
+    private InspectionReport? _inspectionReport;
+    private string _inspectionPropertyAddress = "";
+    private string? _errorMessage;
+    private bool _isInspecting;
+
+    private void ViewTour(string propertyId)
+    {
+        _errorMessage = null;
+        _selectedProperty = DataStore.GetPropertyById(propertyId);
+        _selectedTour = DataStore.GetVirtualTourByPropertyId(propertyId);
+        _inspectionReport = _selectedTour?.Inspection;
+        _inspectionPropertyAddress = _selectedProperty?.Address ?? propertyId;
+    }
+
+    private async Task RunInspection(string propertyId)
+    {
+        _isInspecting = true;
+        _errorMessage = null;
+        try
+        {
+            _inspectionReport = await Manager.RunVirtualTourInspectionAsync(propertyId);
+            _inspectionPropertyAddress = DataStore.GetPropertyById(propertyId)?.Address ?? propertyId;
+            _selectedProperty = DataStore.GetPropertyById(propertyId);
+            _selectedTour = DataStore.GetVirtualTourByPropertyId(propertyId);
+        }
+        catch (InvalidOperationException)
+        {
+            _errorMessage = "No virtual tour is available for this property. Please add a tour first.";
+        }
+        _isInspecting = false;
+    }
+
+    private static string GetConditionBadge(string condition) => condition switch
+    {
+        "Good" => "bg-success",
+        "Fair" => "bg-warning text-dark",
+        "Poor" => "bg-danger",
+        "Critical" => "bg-danger",
+        _ => "bg-secondary"
+    };
+
+    private static string GetSeverityBadge(string severity) => severity switch
+    {
+        "High" => "bg-danger",
+        "Medium" => "bg-warning text-dark",
+        _ => "bg-success"
+    };
+}

@@ -1,0 +1,117 @@
+﻿@page "/"
+@using PropTechWeb.Models
+@using PropTechWeb.Services
+@inject DataStore DataStore
+@inject AIPropertyAgent AIAgent
+@rendermode InteractiveServer
+
+<PageTitle>PropMate AI Dashboard</PageTitle>
+
+<h1>🏠 PropMate AI Dashboard</h1>
+<p class="lead">AI-powered property management — Huawei Cloud Pangu &amp; ModelArts</p>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Properties</h5>
+                <p class="card-text display-6">@DataStore.Properties.Count</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Tenants</h5>
+                <p class="card-text display-6">@DataStore.Tenants.Count</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Active Leases</h5>
+                <p class="card-text display-6">@DataStore.Leases.Count</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">AI Insights</h5>
+                <p class="card-text display-6">@AIAgent.InsightHistory.Count</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>🤖 AI Portfolio Analysis</h3>
+<p>Run the agentic AI to analyse all properties and tenants across your portfolio.</p>
+<button class="btn btn-primary mb-3" @onclick="RunAnalysis" disabled="@_isLoading">
+    @if (_isLoading)
+    {
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+        <span> Analysing...</span>
+    }
+    else
+    {
+        <span>Run AI Analysis</span>
+    }
+</button>
+
+@if (_insights != null && _insights.Count > 0)
+{
+    <div class="row">
+        @foreach (var insight in _insights)
+        {
+            <div class="col-md-6 mb-3">
+                <div class="card @GetCardClass(insight.Category)">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            @GetCategoryIcon(insight.Category) @insight.Title
+                        </h6>
+                        <p class="card-text">@insight.Description</p>
+                        <small class="text-muted">
+                            Confidence: @insight.ConfidenceScore.ToString("P0")
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<AIInsight>? _insights;
+    private bool _isLoading;
+
+    private async Task RunAnalysis()
+    {
+        _isLoading = true;
+        _insights = await AIAgent.RunPortfolioAnalysisAsync();
+        _isLoading = false;
+    }
+
+    private static string GetCardClass(InsightCategory category) => category switch
+    {
+        InsightCategory.TenantScreening => "border-success",
+        InsightCategory.RentalPricing => "border-primary",
+        InsightCategory.MaintenancePrediction => "border-warning",
+        InsightCategory.OccupancyForecast => "border-info",
+        InsightCategory.RiskAssessment => "border-danger",
+        InsightCategory.VirtualTourInspection => "border-info",
+        _ => "border-secondary"
+    };
+
+    private static string GetCategoryIcon(InsightCategory category) => category switch
+    {
+        InsightCategory.TenantScreening => "👤",
+        InsightCategory.RentalPricing => "💰",
+        InsightCategory.MaintenancePrediction => "🔧",
+        InsightCategory.OccupancyForecast => "📊",
+        InsightCategory.RiskAssessment => "⚠️",
+        InsightCategory.LeaseRecommendation => "📄",
+        InsightCategory.VirtualTourInspection => "🔄",
+        _ => "💡"
+    };
+}

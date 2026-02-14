@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PropTechMaui.Pages.TenantsPage"
+             Title="Tenants">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="👤 Tenants" Style="{StaticResource Headline}" />
+            <Label Text="Register and screen tenants with AI-powered risk assessment."
+                   Style="{StaticResource SubHeadline}" />
+
+            <!-- Register Form -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Register New Tenant" FontAttributes="Bold" FontSize="16" />
+                    <Grid ColumnDefinitions="2*,Auto" ColumnSpacing="8">
+                        <Entry x:Name="NewNameEntry" Placeholder="Full Name" Grid.Column="0" />
+                        <Button x:Name="RegisterButton" Text="Register &amp; Screen"
+                                Style="{StaticResource SuccessButton}" Clicked="OnRegisterTenant" Grid.Column="1" />
+                    </Grid>
+                    <ActivityIndicator x:Name="ScreeningIndicator" IsVisible="False" IsRunning="False"
+                                       Color="{StaticResource Primary}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Screening Result -->
+            <Frame x:Name="ScreeningResultFrame" Style="{StaticResource CardFrame}" IsVisible="False">
+                <VerticalStackLayout Spacing="4">
+                    <Label x:Name="ScreeningTitle" FontAttributes="Bold" FontSize="16" />
+                    <Label x:Name="ScreeningRisk" />
+                    <Label x:Name="ScreeningSummary" />
+                    <Label x:Name="ScreeningFactors" TextColor="{StaticResource TextSecondary}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Tenants List -->
+            <Label Text="Registered Tenants" FontAttributes="Bold" FontSize="16" />
+            <CollectionView x:Name="TenantsList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <Grid ColumnDefinitions="2*,3*" ColumnSpacing="12">
+                                <Label Text="{Binding Id}" FontSize="12" TextColor="{StaticResource TextSecondary}"
+                                       VerticalOptions="Center" Grid.Column="0" />
+                                <Label Text="{Binding FullName}" FontAttributes="Bold"
+                                       VerticalOptions="Center" Grid.Column="1" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label x:Name="EmptyMessage" Text="No tenants registered yet."
+                   TextColor="{StaticResource TextSecondary}" IsVisible="True" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

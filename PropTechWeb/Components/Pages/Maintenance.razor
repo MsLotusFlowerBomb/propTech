@@ -1,0 +1,93 @@
+@page "/maintenance"
+@using PropTechWeb.Models
+@using PropTechWeb.Services
+@inject DataStore DataStore
+@inject PropertyManager Manager
+@rendermode InteractiveServer
+
+<PageTitle>Maintenance — PropMate AI</PageTitle>
+
+<h2>🔧 Predictive Maintenance</h2>
+<p>AI-powered maintenance predictions to prevent issues before they occur.</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Address</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prop in DataStore.Properties)
+        {
+            <tr>
+                <td>@prop.Id</td>
+                <td>@prop.Address</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-warning" @onclick="() => PredictMaintenance(prop.Id)">
+                        🔧 Predict Maintenance
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (_predictions.Count > 0)
+{
+    <h4>AI Maintenance Predictions</h4>
+    <div class="row">
+        @foreach (var pred in _predictions)
+        {
+            <div class="col-md-6 mb-3">
+                <div class="card @GetUrgencyClass(pred.Urgency)">
+                    <div class="card-header">
+                        🔧 @GetPropertyAddress(pred.PropertyId)
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Urgency:</strong>
+                            <span class="badge @GetUrgencyBadge(pred.Urgency)">@pred.Urgency</span>
+                        </p>
+                        <p><strong>Estimated Cost:</strong> R @pred.EstimatedCost.ToString("N0")</p>
+                        <p><strong>Days Until Needed:</strong> @pred.EstimatedDaysUntilNeeded</p>
+                        <p><strong>Issue:</strong> @pred.Issue</p>
+                        <small class="text-muted">Confidence: @pred.ConfidenceScore.ToString("P0")</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<MaintenancePrediction> _predictions = new();
+
+    private async Task PredictMaintenance(string propertyId)
+    {
+        var prediction = await Manager.GetMaintenancePredictionAsync(propertyId);
+        // Replace existing prediction for same property
+        _predictions.RemoveAll(p => p.PropertyId == propertyId);
+        _predictions.Add(prediction);
+    }
+
+    private string GetPropertyAddress(string propertyId)
+    {
+        var prop = DataStore.GetPropertyById(propertyId);
+        return prop?.Address ?? propertyId;
+    }
+
+    private static string GetUrgencyClass(string urgency) => urgency switch
+    {
+        "High" => "border-danger",
+        "Medium" => "border-warning",
+        _ => "border-success"
+    };
+
+    private static string GetUrgencyBadge(string urgency) => urgency switch
+    {
+        "High" => "bg-danger",
+        "Medium" => "bg-warning text-dark",
+        _ => "bg-success"
+    };
+}

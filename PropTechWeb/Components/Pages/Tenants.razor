@@ -1,0 +1,96 @@
+@page "/tenants"
+@using PropTechWeb.Models
+@using PropTechWeb.Services
+@inject DataStore DataStore
+@inject PropertyManager Manager
+@rendermode InteractiveServer
+
+<PageTitle>Tenants — PropMate AI</PageTitle>
+
+<h2>👤 Tenants</h2>
+<p>Register and screen tenants with AI-powered risk assessment.</p>
+
+<h4>Register New Tenant</h4>
+<div class="row mb-4">
+    <div class="col-md-5">
+        <input class="form-control" placeholder="Full Name" @bind="_newName" />
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-success" @onclick="RegisterTenant" disabled="@_isScreening">
+            @if (_isScreening)
+            {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                <span> Screening...</span>
+            }
+            else
+            {
+                <span>Register &amp; Screen</span>
+            }
+        </button>
+    </div>
+</div>
+
+@if (_screeningResult != null)
+{
+    <div class="alert @GetRiskAlertClass(_screeningResult.Risk)">
+        <h5>🤖 AI Screening Result for @_lastTenantName</h5>
+        <p><strong>Risk Level:</strong> @_screeningResult.Risk (Score: @_screeningResult.RiskScore.ToString("F2"))</p>
+        <p><strong>Summary:</strong> @_screeningResult.Summary</p>
+        <ul>
+            @foreach (var factor in _screeningResult.Factors)
+            {
+                <li>@factor</li>
+            }
+        </ul>
+    </div>
+}
+
+<h4>Registered Tenants</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var tenant in DataStore.Tenants)
+        {
+            <tr>
+                <td><code>@tenant.Id</code></td>
+                <td>@tenant.FullName</td>
+            </tr>
+        }
+        @if (DataStore.Tenants.Count == 0)
+        {
+            <tr><td colspan="2" class="text-muted">No tenants registered yet.</td></tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private string _newName = "";
+    private string _lastTenantName = "";
+    private bool _isScreening;
+    private TenantScreeningResult? _screeningResult;
+
+    private async Task RegisterTenant()
+    {
+        if (string.IsNullOrWhiteSpace(_newName)) return;
+
+        _isScreening = true;
+        _lastTenantName = _newName;
+        var (_, screening) = await Manager.RegisterNewTenantAsync(_newName);
+        _screeningResult = screening;
+        _newName = "";
+        _isScreening = false;
+    }
+
+    private static string GetRiskAlertClass(RiskLevel risk) => risk switch
+    {
+        RiskLevel.Low => "alert-success",
+        RiskLevel.Medium => "alert-warning",
+        RiskLevel.High => "alert-danger",
+        _ => "alert-info"
+    };
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PropTechMaui.Pages.PropertiesPage"
+             Title="Properties">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="🏘️ Properties" Style="{StaticResource Headline}" />
+            <Label Text="Manage your property portfolio with AI-powered pricing recommendations."
+                   Style="{StaticResource SubHeadline}" />
+
+            <!-- Add Property Form -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Add Property" FontAttributes="Bold" FontSize="16" />
+                    <Grid ColumnDefinitions="*,2*,*,Auto" ColumnSpacing="8">
+                        <Entry x:Name="NewIdEntry" Placeholder="Property ID" Grid.Column="0" />
+                        <Entry x:Name="NewAddressEntry" Placeholder="Address" Grid.Column="1" />
+                        <Entry x:Name="NewRentEntry" Placeholder="Monthly Rent (R)" Keyboard="Numeric" Grid.Column="2" />
+                        <Button Text="Add" Style="{StaticResource SuccessButton}" Clicked="OnAddProperty" Grid.Column="3" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Properties List -->
+            <CollectionView x:Name="PropertiesList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding Id}" FontAttributes="Bold" VerticalOptions="Center" Grid.Column="0" />
+                                <Label Text="{Binding Address}" VerticalOptions="Center" Grid.Column="1" />
+                                <Label Text="{Binding RentDisplay}" VerticalOptions="Center" Grid.Column="2" />
+                                <Button Text="💰 AI Pricing" Style="{StaticResource WarningButton}"
+                                        CommandParameter="{Binding Id}" Clicked="OnGetPricing" Grid.Column="3" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Pricing Result -->
+            <Frame x:Name="PricingResultFrame" Style="{StaticResource CardFrame}" IsVisible="False"
+                   BorderColor="{StaticResource Primary}">
+                <VerticalStackLayout Spacing="4">
+                    <Label x:Name="PricingTitle" FontAttributes="Bold" FontSize="16" />
+                    <Label x:Name="PricingRecommended" />
+                    <Label x:Name="PricingRange" />
+                    <Label x:Name="PricingConfidence" TextColor="{StaticResource TextSecondary}" />
+                    <Label x:Name="PricingFactors" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

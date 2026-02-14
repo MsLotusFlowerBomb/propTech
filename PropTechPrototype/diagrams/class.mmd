@@ -65,17 +65,88 @@ classDiagram
 
     class PropertyManager {
       -DataStore store
-      +RegisterNewTenant(data)
-      +CreateLease(tenantId, propertyId)
-      +IssueInvoice(leaseId)
+      -AIPropertyAgent aiAgent
+      +RegisterNewTenantAsync(fullName)
+      +CreateLeaseAsync(tenantId, propertyId)
+      +GetPricingRecommendationAsync(propertyId)
+      +GetMaintenancePredictionAsync(propertyId)
+      +RunVirtualTourInspectionAsync(propertyId)
+    }
+
+    class AIConfiguration {
+      +string Region
+      +string ProjectId
+      +string PanguModelId
+      +bool IsEnabled
+      +CreateDemo(): AIConfiguration
+    }
+
+    class HuaweiAIService {
+      -AIConfiguration config
+      +GetAuthTokenAsync(): string
+      +GenerateTextAsync(prompt): string
+      +PredictAsync(modelId, features): Dictionary
+    }
+
+    class AIPropertyAgent {
+      -HuaweiAIService aiService
+      -DataStore dataStore
+      +ScreenTenantAsync(tenant): TenantScreeningResult
+      +RecommendRentalPriceAsync(property): RentalPricingRecommendation
+      +PredictMaintenanceAsync(property): MaintenancePrediction
+      +GenerateLeaseClauseAsync(property, tenant, clauseType): string
+      +AnalyseVirtualTourAsync(tour, property): InspectionReport
+      +RunPortfolioAnalysisAsync(): List~AIInsight~
+    }
+
+    class AIInsight {
+      +InsightCategory Category
+      +string Title
+      +double ConfidenceScore
+    }
+
+    class VirtualTour {
+      +string Id
+      +string PropertyId
+      +List~RoomPanorama~ Rooms
+      +InspectionReport Inspection
+    }
+
+    class RoomPanorama {
+      +string RoomName
+      +string PanoramaUrl
+      +string Description
+    }
+
+    class InspectionReport {
+      +string OverallCondition
+      +double ConditionScore
+      +List~InspectionFinding~ Findings
+      +decimal EstimatedRepairCost
+    }
+
+    class InspectionFinding {
+      +string Room
+      +string Issue
+      +string Severity
+      +decimal EstimatedCost
     }
 
     DataStore "1" -- "1" Landlord : manages
     DataStore "1" -- "0..*" Tenant : manages
     DataStore "1" -- "0..*" Property : manages
+    DataStore "1" -- "0..*" VirtualTour : manages
     Property <|-- Room
     Property <|-- House
     LeaseAgreement "1" -- "1" Tenant : has
     LeaseAgreement "1" -- "1" Property : has
+    VirtualTour "1" -- "1" Property : for
+    VirtualTour "1" -- "0..*" RoomPanorama : contains
+    VirtualTour "0..1" -- "1" InspectionReport : has
+    InspectionReport "1" -- "0..*" InspectionFinding : details
     PropertyManager "1" -- "1" DataStore : uses
+    PropertyManager "1" -- "1" AIPropertyAgent : uses
+    AIPropertyAgent "1" -- "1" HuaweiAIService : uses
+    AIPropertyAgent "1" -- "1" DataStore : reads
+    HuaweiAIService "1" -- "1" AIConfiguration : configured-by
     Invoice "1" -- "1" Tenant : billed-to

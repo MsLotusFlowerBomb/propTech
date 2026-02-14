@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using PropTechPrototype.Models;
+using PropTechWeb.Models;
 
-namespace PropTechPrototype.Services
+namespace PropTechWeb.Services
 {
     /// <summary>
     /// Main business-logic controller for property management operations.

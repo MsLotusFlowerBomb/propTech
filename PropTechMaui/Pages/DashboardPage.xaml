@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PropTechMaui.Pages.DashboardPage"
+             Title="Dashboard">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="🏠 PropMate AI Dashboard" Style="{StaticResource Headline}" />
+            <Label Text="AI-powered property management — Huawei Cloud Pangu &amp; ModelArts"
+                   Style="{StaticResource SubHeadline}" />
+
+            <!-- Stats Cards -->
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                <Frame Grid.Column="0" Style="{StaticResource CardFrame}" BackgroundColor="{StaticResource Primary}">
+                    <VerticalStackLayout>
+                        <Label Text="Properties" TextColor="White" FontAttributes="Bold" />
+                        <Label x:Name="PropertyCount" Text="0" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" Style="{StaticResource CardFrame}" BackgroundColor="{StaticResource Accent}">
+                    <VerticalStackLayout>
+                        <Label Text="Tenants" TextColor="White" FontAttributes="Bold" />
+                        <Label x:Name="TenantCount" Text="0" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="2" Style="{StaticResource CardFrame}" BackgroundColor="{StaticResource Info}">
+                    <VerticalStackLayout>
+                        <Label Text="Active Leases" TextColor="White" FontAttributes="Bold" />
+                        <Label x:Name="LeaseCount" Text="0" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="3" Style="{StaticResource CardFrame}" BackgroundColor="{StaticResource Warning}">
+                    <VerticalStackLayout>
+                        <Label Text="AI Insights" FontAttributes="Bold" />
+                        <Label x:Name="InsightCount" Text="0" FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- AI Analysis -->
+            <Label Text="🤖 AI Portfolio Analysis" FontSize="20" FontAttributes="Bold" />
+            <Label Text="Run the agentic AI to analyse all properties and tenants across your portfolio."
+                   Style="{StaticResource SubHeadline}" />
+
+            <Button x:Name="AnalyseButton" Text="Run AI Analysis" Clicked="OnRunAnalysis" />
+            <ActivityIndicator x:Name="LoadingIndicator" IsVisible="False" IsRunning="False" Color="{StaticResource Primary}" />
+
+            <!-- Insights List -->
+            <CollectionView x:Name="InsightsList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="0,4">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="14" />
+                                <Label Text="{Binding Description}" FontSize="13" />
+                                <Label Text="{Binding ConfidenceText}" TextColor="{StaticResource TextSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

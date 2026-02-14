@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using PropTechPrototype.Models;
+using PropTechMaui.Models;
 
-namespace PropTechPrototype.Services
+namespace PropTechMaui.Services
 {
     /// <summary>
     /// Simple in-memory data store for domain collections.
@@ -72,7 +72,7 @@ namespace PropTechPrototype.Services
     }
 }
 
-namespace PropTechPrototype.Models
+namespace PropTechMaui.Models
 {
     public class Landlord
     {

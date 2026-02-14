@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using PropTechPrototype.Models;
+using PropTechMaui.Models;
 
-namespace PropTechPrototype.Services
+namespace PropTechMaui.Services
 {
     /// <summary>
     /// Main business-logic controller for property management operations.
