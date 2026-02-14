@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using PropTechPrototype.Models;
 
 namespace PropTechPrototype.Services
 {
     /// <summary>
     /// Simple in-memory data store for domain collections.
     /// Exposes read-only views and encapsulates mutation methods.
-    class DataStore
+    /// </summary>
+    public class DataStore
     {
         private List<Tenant> _tenants = new();
         private readonly List<Property> _properties = new();
