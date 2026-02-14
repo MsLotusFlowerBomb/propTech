@@ -1,6 +1,7 @@
 # PROPTECH
 
 **Diagrams:** See `DIAGRAMS.md` for Mermaid source, or open `PropTechPrototype/diagrams/` to view exported SVGs (if generated).
+**Code4Mzansi brief:** See `CODE4MZANSI.md` for workflows, journey map, evaluation, and improvement notes.
 
 The project you are creating is a **PropTech (Property Technology) Web Application Prototype** developed using Object-Oriented principles. It is specifically designed as a **Data-Driven Business Logic Application**, where the core functionality revolves around managing data entities (Tenant, Property, Financials) and generating complex documents from that data.
 
