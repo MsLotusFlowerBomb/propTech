@@ -1,5 +1,8 @@
 # PROPTECH
 
+> **⚠️ PROTOTYPE STATUS:** This is a working prototype demonstrating AI-powered property management concepts. See [REVIEW_INDEX.md](../REVIEW_INDEX.md) for comprehensive platform assessment.
+
+**Competition Review:** See [REVIEW_INDEX.md](../REVIEW_INDEX.md) for complete Code4Mzansi competition analysis, presentation guide, and technical roadmap.
 **Diagrams:** See `DIAGRAMS.md` for Mermaid source, or open `PropTechPrototype/diagrams/` to view exported SVGs (if generated).
 **Code4Mzansi brief:** See `CODE4MZANSI.md` for workflows, journey map, evaluation, and improvement notes.
 **Marketplace:** The brief now includes marketplace flows (listing, discovery, AI recommendations, booking) and diagrams.
