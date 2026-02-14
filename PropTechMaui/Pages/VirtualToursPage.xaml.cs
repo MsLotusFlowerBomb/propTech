@@ -65,9 +65,17 @@ public partial class VirtualToursPage : ContentPage
             var prop = _dataStore.GetPropertyById(propertyId);
             if (prop == null) return;
 
-            var report = await _manager.RunVirtualTourInspectionAsync(propertyId);
-            ShowInspection(report, prop.Address);
-            RefreshList();
+            try
+            {
+                var report = await _manager.RunVirtualTourInspectionAsync(propertyId);
+                ShowInspection(report, prop.Address);
+                RefreshList();
+            }
+            catch (InvalidOperationException)
+            {
+                await DisplayAlert("Inspection Error",
+                    "No virtual tour is available for this property. Please add a tour first.", "OK");
+            }
         }
     }
 

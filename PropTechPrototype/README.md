@@ -48,6 +48,7 @@ Here is the comprehensive plan, project structure, and detailed iteration breakd
 | **Financials**  | Invoice and Statement Generation           | Creates bills (Invoices) and monthly summaries (Statements) incorporating Rent, Deposit, and line items like Electricity (in South African Rand (R)). |
 | **Documenting** | Dynamic Print-Friendly Document Generation | Generates Lease Agreements and Statements using a "Print View" modal (HTML styled as A4 paper), avoiding complex PDF generation.                      |
 | **AI**          | Huawei Cloud AI Integration                | Agentic AI powered by Huawei Cloud Pangu models for tenant screening, rental pricing, maintenance prediction, and lease clause generation.            |
+| **360° Tours**  | Virtual Tour & AI Inspection               | 360° room panoramas with AI-powered visual inspection — detects defects, scores property condition, and estimates repair costs per room.              |
 
 ### B. Architecture and OOP Rationale
 
@@ -211,6 +212,7 @@ V3 introduces intelligent, AI-driven property management powered by **Huawei Clo
 | **AI Lease Clause Generation**   | Generate legally compliant lease clauses                      | `AIPropertyAgent.GenerateLeaseClauseAsync()`                      | **Polymorphism:** Tailors clauses to specific property types and tenant profiles, compliant with SA Rental Housing Act.                                 |
 | **Portfolio Analysis**           | Agentic full-portfolio insight generation                     | `AIPropertyAgent.RunPortfolioAnalysisAsync()`                     | **Agentic AI:** Autonomously analyses all properties and tenants, generating a comprehensive set of actionable insights.                               |
 | **AI Configuration & Models**    | Settings and result types for AI features                     | `AIConfiguration`, `AIInsight`, `InsightCategory`, `RiskLevel`    | **Encapsulation:** Configuration uses factory method (`CreateDemo()`) for test/demo scenarios. All AI result types are immutable with private setters.  |
+| **360° Virtual Tour & Inspection** | AI-powered property inspection from 360° panoramas          | `VirtualTour`, `RoomPanorama`, `InspectionReport`, `InspectionFinding`, `AIPropertyAgent.AnalyseVirtualTourAsync()` | **Composition:** Tour contains room panoramas; AI analyses each room to generate findings. Huawei Cloud vision models detect defects, score condition, and estimate repair costs. |
 
 #### Huawei Cloud AI Architecture
 

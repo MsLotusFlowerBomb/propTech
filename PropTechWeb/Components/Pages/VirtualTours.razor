@@ -83,6 +83,11 @@
     </div>
 }
 
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-warning" role="alert">@_errorMessage</div>
+}
+
 @* ── 360° Tour Viewer ── *@
 @if (_selectedTour != null && _selectedProperty != null)
 {
@@ -198,10 +203,12 @@
     private Property? _selectedProperty;
     private InspectionReport? _inspectionReport;
     private string _inspectionPropertyAddress = "";
+    private string? _errorMessage;
     private bool _isInspecting;
 
     private void ViewTour(string propertyId)
     {
+        _errorMessage = null;
         _selectedProperty = DataStore.GetPropertyById(propertyId);
         _selectedTour = DataStore.GetVirtualTourByPropertyId(propertyId);
         _inspectionReport = _selectedTour?.Inspection;
@@ -211,6 +218,7 @@
     private async Task RunInspection(string propertyId)
     {
         _isInspecting = true;
+        _errorMessage = null;
         try
         {
             _inspectionReport = await Manager.RunVirtualTourInspectionAsync(propertyId);
@@ -218,9 +226,9 @@
             _selectedProperty = DataStore.GetPropertyById(propertyId);
             _selectedTour = DataStore.GetVirtualTourByPropertyId(propertyId);
         }
-        catch (Exception)
+        catch (InvalidOperationException)
         {
-            // Handled gracefully — no report shown
+            _errorMessage = "No virtual tour is available for this property. Please add a tour first.";
         }
         _isInspecting = false;
     }

@@ -77,6 +77,7 @@ classDiagram
       +CreateLeaseAsync(tenantId, propertyId)
       +GetPricingRecommendationAsync(propertyId)
       +GetMaintenancePredictionAsync(propertyId)
+      +RunVirtualTourInspectionAsync(propertyId)
     }
 
     class AIConfiguration {
@@ -101,6 +102,7 @@ classDiagram
       +RecommendRentalPriceAsync(property): RentalPricingRecommendation
       +PredictMaintenanceAsync(property): MaintenancePrediction
       +GenerateLeaseClauseAsync(property, tenant, clauseType): string
+      +AnalyseVirtualTourAsync(tour, property): InspectionReport
       +RunPortfolioAnalysisAsync(): List~AIInsight~
     }
 
@@ -110,13 +112,49 @@ classDiagram
       +double ConfidenceScore
     }
 
+    class VirtualTour {
+      +string Id
+      +string PropertyId
+      +DateTime CreatedAt
+      +List~RoomPanorama~ Rooms
+      +InspectionReport Inspection
+      +SetInspection(report)
+    }
+
+    class RoomPanorama {
+      +string RoomName
+      +string PanoramaUrl
+      +string Description
+    }
+
+    class InspectionReport {
+      +string PropertyId
+      +string OverallCondition
+      +double ConditionScore
+      +List~InspectionFinding~ Findings
+      +decimal EstimatedRepairCost
+      +double ConfidenceScore
+    }
+
+    class InspectionFinding {
+      +string Room
+      +string Issue
+      +string Severity
+      +decimal EstimatedCost
+    }
+
     DataStore "1" -- "1" Landlord : manages
     DataStore "1" -- "0..*" Tenant : manages
     DataStore "1" -- "0..*" Property : manages
+    DataStore "1" -- "0..*" VirtualTour : manages
     Property <|-- Room
     Property <|-- House
     LeaseAgreement "1" -- "1" Tenant : has
     LeaseAgreement "1" -- "1" Property : has
+    VirtualTour "1" -- "1" Property : for
+    VirtualTour "1" -- "0..*" RoomPanorama : contains
+    VirtualTour "0..1" -- "1" InspectionReport : has
+    InspectionReport "1" -- "0..*" InspectionFinding : details
     PropertyManager "1" -- "1" DataStore : uses
     PropertyManager "1" -- "1" AIPropertyAgent : uses
     AIPropertyAgent "1" -- "1" HuaweiAIService : uses
