@@ -178,6 +178,12 @@ namespace PropTechPrototype.Services
                        "the next 90 days and electrical certification renewal within 6 months. " +
                        "Estimated combined maintenance cost: R4,200.";
 
+            if (lowerPrompt.Contains("virtual tour") || lowerPrompt.Contains("360") || lowerPrompt.Contains("inspection"))
+                return "AI visual inspection of the 360° virtual tour identifies: minor wall cracks in the " +
+                       "living area (cosmetic), aging kitchen fixtures requiring replacement within 12 months, " +
+                       "bathroom grouting showing early signs of moisture damage, and windows in good condition. " +
+                       "Overall property condition rated 7.2/10. Estimated remediation cost: R8,500.";
+
             if (lowerPrompt.Contains("lease") || lowerPrompt.Contains("clause"))
                 return "The Lessee shall occupy the premises solely for residential purposes. " +
                        "The property shall be maintained in good condition, and the Lessee agrees " +
@@ -226,6 +232,13 @@ namespace PropTechPrototype.Services
                 results["failure_probability"] = 0.15;
                 results["estimated_cost"] = 4200.0;
                 results["days_until_needed"] = 90.0;
+            }
+            else if (modelId.Contains("inspection") || modelId.Contains("tour"))
+            {
+                results["condition_score"] = 0.72;
+                results["estimated_repair_cost"] = 8500.0;
+                results["confidence"] = 0.88;
+                results["defect_count"] = 3.0;
             }
             else
             {

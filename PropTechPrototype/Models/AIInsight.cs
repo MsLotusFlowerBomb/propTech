@@ -36,7 +36,8 @@ namespace PropTechPrototype.Models
         MaintenancePrediction,
         LeaseRecommendation,
         OccupancyForecast,
-        RiskAssessment
+        RiskAssessment,
+        VirtualTourInspection
     }
 
     /// <summary>
