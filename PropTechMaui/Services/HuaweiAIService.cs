@@ -72,7 +72,7 @@ namespace PropTechMaui.Services
             var response = await _httpClient.PostAsync(url, content);
             response.EnsureSuccessStatusCode();
 
-            _authToken = response.Headers.GetValues("X-Subject-Token").GetEnumerator().Current?.ToString();
+            _authToken = response.Headers.GetValues("X-Subject-Token").FirstOrDefault();
             _tokenExpiry = DateTime.UtcNow.AddHours(23);
             return _authToken ?? throw new InvalidOperationException("Failed to obtain auth token");
         }

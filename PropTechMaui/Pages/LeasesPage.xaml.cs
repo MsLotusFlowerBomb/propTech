@@ -25,7 +25,7 @@ public partial class LeasesPage : ContentPage
     private void RefreshPickers()
     {
         TenantPicker.ItemsSource = _dataStore.Tenants
-            .Select(t => $"{t.FullName} ({t.Id[..8]}...)")
+            .Select(t => $"{t.FullName} ({(t.Id.Length > 8 ? t.Id[..8] : t.Id)}...)")
             .ToList();
         PropertyPicker.ItemsSource = _dataStore.Properties
             .Select(p => $"{p.Address} (R {p.MonthlyRent:N0})")
@@ -37,7 +37,7 @@ public partial class LeasesPage : ContentPage
         var leases = _dataStore.Leases
             .Select(l => new LeaseDisplayItem
             {
-                LeaseId = l.Id[..8] + "...",
+                LeaseId = (l.Id.Length > 8 ? l.Id[..8] : l.Id) + "...",
                 TenantName = l.Lessee.FullName,
                 PropertyAddress = l.LeasedProperty.Address,
                 RentDisplay = $"R {l.MonthlyRent:N0}"

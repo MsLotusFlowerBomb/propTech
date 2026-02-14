@@ -76,7 +76,7 @@
         @foreach (var lease in DataStore.Leases)
         {
             <tr>
-                <td><code>@lease.Id[..8]...</code></td>
+                <td><code>@(lease.Id.Length > 8 ? lease.Id[..8] : lease.Id)...</code></td>
                 <td>@lease.Lessee.FullName</td>
                 <td>@lease.LeasedProperty.Address</td>
                 <td>R @lease.MonthlyRent.ToString("N0")</td>

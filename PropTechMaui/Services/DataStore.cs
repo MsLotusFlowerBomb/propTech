@@ -10,7 +10,7 @@ namespace PropTechMaui.Services
     /// </summary>
     public class DataStore
     {
-        private List<Tenant> _tenants = new();
+        private readonly List<Tenant> _tenants = new();
         private readonly List<Property> _properties = new();
         private readonly List<LeaseAgreement> _leases = new();
 
