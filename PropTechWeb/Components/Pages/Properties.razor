@@ -1,0 +1,94 @@
+@page "/properties"
+@using PropTechWeb.Models
+@using PropTechWeb.Services
+@inject DataStore DataStore
+@inject PropertyManager Manager
+@rendermode InteractiveServer
+
+<PageTitle>Properties — PropMate AI</PageTitle>
+
+<h2>🏘️ Properties</h2>
+<p>Manage your property portfolio with AI-powered pricing recommendations.</p>
+
+<h4>Add Property</h4>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <input class="form-control" placeholder="Property ID" @bind="_newId" />
+    </div>
+    <div class="col-md-4">
+        <input class="form-control" placeholder="Address" @bind="_newAddress" />
+    </div>
+    <div class="col-md-2">
+        <input class="form-control" type="number" placeholder="Monthly Rent (R)" @bind="_newRent" />
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-success" @onclick="AddProperty">Add Property</button>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Address</th>
+            <th>Monthly Rent</th>
+            <th>AI Pricing</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prop in DataStore.Properties)
+        {
+            <tr>
+                <td>@prop.Id</td>
+                <td>@prop.Address</td>
+                <td>R @prop.MonthlyRent.ToString("N0")</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" @onclick="() => GetPricing(prop.Id)">
+                        💰 Get AI Pricing
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (_pricingResult != null)
+{
+    <div class="card border-primary mb-3">
+        <div class="card-header">💰 AI Pricing Recommendation for @_pricingResult.PropertyId</div>
+        <div class="card-body">
+            <p><strong>Recommended Rent:</strong> R @_pricingResult.RecommendedRent.ToString("N0") / month</p>
+            <p><strong>Range:</strong> R @_pricingResult.MinRent.ToString("N0") – R @_pricingResult.MaxRent.ToString("N0")</p>
+            <p><strong>Confidence:</strong> @_pricingResult.ConfidenceScore.ToString("P0")</p>
+            <ul>
+                @foreach (var f in _pricingResult.MarketFactors)
+                {
+                    <li>@f</li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    private string _newId = "";
+    private string _newAddress = "";
+    private decimal _newRent;
+    private RentalPricingRecommendation? _pricingResult;
+
+    private void AddProperty()
+    {
+        if (!string.IsNullOrWhiteSpace(_newId) && !string.IsNullOrWhiteSpace(_newAddress) && _newRent > 0)
+        {
+            DataStore.AddProperty(new Property(_newId, _newAddress, _newRent));
+            _newId = "";
+            _newAddress = "";
+            _newRent = 0;
+        }
+    }
+
+    private async Task GetPricing(string propertyId)
+    {
+        _pricingResult = await Manager.GetPricingRecommendationAsync(propertyId);
+    }
+}
