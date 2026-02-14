@@ -97,6 +97,37 @@ journey
       Renew or close-out: 4: Prospect, Manager
 ```
 
+## Marketplace section (added)
+
+- **Purpose:** Connect landlords, tenants, and service providers (repairs, cleaning, security) with verified listings, transparent pricing, and AI-matched recommendations.
+- **Flows:** 
+  - Listing: PropertyManager publishes unit/service with attributes and availability (DataStore).
+  - Discovery: Tenants/agents browse via Blazor; MAUI surfaces quick actions for managers.
+  - Match & quote: AIPropertyAgent suggests best-fit options and estimated pricing based on property/tenant profile.
+  - Booking & payment: IssueInvoice for booking fees/deposits; integrate payment gateway (future work) while recording transactions in DataStore.
+- **Governance:** Ratings/feedback stored alongside InspectionReports and AI insights to improve future recommendations.
+
+### Visual: Marketplace listing & booking flow
+
+```mermaid
+sequenceDiagram
+    participant Manager as Landlord/Manager (MAUI)
+    participant Web as Tenant/Agent (Blazor)
+    participant PM as PropertyManager
+    participant DS as DataStore
+    participant AI as AIPropertyAgent
+
+    Manager->>PM: Publish listing/service
+    PM->>DS: Save listing + availability
+    Web->>PM: Browse/search listings
+    PM->>AI: Recommend matches (context-aware)
+    AI-->>PM: Ranked options + rationale
+    PM-->>Web: Show options
+    Web->>PM: Request booking/quote
+    PM->>DS: Create booking + IssueInvoice
+    PM-->>Web: Invoice/confirmation
+```
+
 ## 4) Evaluation & review
 
 - **Readiness:** Flows and models are defined end-to-end; MAUI/Blazor split supports both manager desktop and tenant web experiences. Demo-friendly via in-memory DataStore.
