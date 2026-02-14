@@ -115,9 +115,9 @@
             _selectedTenantId = "";
             _selectedPropertyId = "";
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _errorMessage = ex.Message;
+            _errorMessage = "An error occurred while creating the lease. Please check your selections and try again.";
         }
         finally
         {

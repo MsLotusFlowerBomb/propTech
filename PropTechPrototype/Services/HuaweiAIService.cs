@@ -118,11 +118,15 @@ namespace PropTechPrototype.Services
 
             var responseJson = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(responseJson);
-            return doc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString() ?? string.Empty;
+            var root = doc.RootElement;
+            if (root.TryGetProperty("choices", out var choices) &&
+                choices.GetArrayLength() > 0 &&
+                choices[0].TryGetProperty("message", out var message) &&
+                message.TryGetProperty("content", out var contentVal))
+            {
+                return contentVal.GetString() ?? string.Empty;
+            }
+            return string.Empty;
         }
 
         /// <summary>
