@@ -106,9 +106,13 @@ namespace PropTechMaui.Services
             return await _aiAgent.AnalyseVirtualTourAsync(tour, property);
         }
 
+        private const decimal DefaultWaterElectricityLevy = 350m;
+        private const decimal DefaultAdministrationFee = 150m;
+
         /// <summary>
         /// Issues a monthly rental invoice for the specified lease.
-        /// Builds line items from the lease (rent + optional levies) and stores the invoice.
+        /// Builds line items from the lease (rent + default levies) and stores the invoice.
+        /// The levy amounts are default values; customise via a fee configuration class when needed.
         /// </summary>
         public Task<Invoice> IssueInvoiceAsync(string leaseId)
         {
@@ -133,8 +137,8 @@ namespace PropTechMaui.Services
             var items = new List<LineItem>
             {
                 new LineItem("Monthly Rent", lease.MonthlyRent),
-                new LineItem("Water & Electricity Levy", 350m),
-                new LineItem("Administration Fee", 150m)
+                new LineItem("Water & Electricity Levy", DefaultWaterElectricityLevy),
+                new LineItem("Administration Fee", DefaultAdministrationFee)
             };
 
             var invoice = new Invoice(

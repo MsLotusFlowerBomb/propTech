@@ -258,9 +258,9 @@
             _lastInvoice = await Manager.IssueInvoiceAsync(_selectedLeaseId);
             _selectedLeaseId = "";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _invoiceError = "An error occurred while issuing the invoice. Please check your selection and try again.";
+            _invoiceError = $"Failed to issue invoice: {ex.Message}";
         }
         finally
         {
@@ -285,9 +285,9 @@
             _lastStatement = await Manager.GenerateStatementAsync(_selectedTenantId);
             _selectedTenantId = "";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _statementError = "An error occurred while generating the statement. Please check your selection and try again.";
+            _statementError = $"Failed to generate statement: {ex.Message}";
         }
         finally
         {
