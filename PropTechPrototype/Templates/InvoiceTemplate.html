@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PropMate — Rental Invoice</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f8; color: #212121; }
+        .page { max-width: 750px; margin: 32px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.10); overflow: hidden; }
+        /* Header */
+        .header { background: #1565C0; color: #fff; padding: 28px 36px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+        .header .sub { font-size: 13px; opacity: 0.85; }
+        .header .invoice-meta { text-align: right; }
+        .header .invoice-meta .label { font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header .invoice-meta .value { font-size: 15px; font-weight: 600; }
+        .status-badge { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-top: 6px; background: #FFC107; color: #212121; }
+        .status-badge.paid { background: #4CAF50; color: #fff; }
+        .status-badge.overdue { background: #F44336; color: #fff; }
+        /* Parties */
+        .parties { display: flex; padding: 24px 36px; gap: 32px; border-bottom: 1px solid #E0E0E0; }
+        .party { flex: 1; }
+        .party h4 { font-size: 11px; text-transform: uppercase; color: #757575; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .party p { font-size: 14px; line-height: 1.7; }
+        .party .name { font-weight: 600; font-size: 15px; }
+        /* Dates */
+        .dates { display: flex; padding: 16px 36px; gap: 32px; border-bottom: 1px solid #E0E0E0; background: #FAFAFA; }
+        .date-item { flex: 1; }
+        .date-item .label { font-size: 11px; text-transform: uppercase; color: #757575; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .date-item .value { font-size: 14px; font-weight: 500; }
+        /* Line Items Table */
+        .items-section { padding: 24px 36px; }
+        .items-section h3 { font-size: 13px; text-transform: uppercase; color: #757575; letter-spacing: 0.5px; margin-bottom: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { border-bottom: 2px solid #1565C0; }
+        thead th { font-size: 12px; text-transform: uppercase; color: #1565C0; padding: 8px 0; text-align: left; letter-spacing: 0.3px; }
+        thead th:last-child { text-align: right; }
+        tbody tr { border-bottom: 1px solid #F0F0F0; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody td { padding: 12px 0; font-size: 14px; }
+        tbody td.qty { color: #757575; }
+        tbody td.amount { text-align: right; font-weight: 500; }
+        /* Totals */
+        .totals { padding: 16px 36px 24px; border-top: 1px solid #E0E0E0; }
+        .total-row { display: flex; justify-content: flex-end; gap: 48px; padding: 6px 0; font-size: 14px; }
+        .total-row.grand { font-size: 18px; font-weight: 700; color: #1565C0; border-top: 2px solid #1565C0; margin-top: 6px; padding-top: 10px; }
+        /* Banking Details */
+        .banking { background: #E3F2FD; padding: 20px 36px; border-top: 1px solid #BBDEFB; }
+        .banking h4 { font-size: 12px; text-transform: uppercase; color: #1565C0; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .banking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; font-size: 13px; }
+        .banking-grid .bk-label { color: #757575; }
+        .banking-grid .bk-value { font-weight: 500; }
+        /* Footer */
+        .footer { background: #FAFAFA; padding: 16px 36px; font-size: 12px; color: #9E9E9E; text-align: center; border-top: 1px solid #E0E0E0; }
+        .footer a { color: #1565C0; text-decoration: none; }
+        @media print {
+            body { background: #fff; }
+            .page { box-shadow: none; margin: 0; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1>🏠 PropMate</h1>
+            <div class="sub">AI-Powered Property Management</div>
+            <div class="sub">South Africa</div>
+        </div>
+        <div class="invoice-meta">
+            <div class="label">Invoice Number</div>
+            <div class="value">{{InvoiceNumber}}</div>
+            <div class="label" style="margin-top:10px">Status</div>
+            <div><span class="status-badge {{StatusClass}}">{{Status}}</span></div>
+        </div>
+    </div>
+
+    <!-- Parties -->
+    <div class="parties">
+        <div class="party">
+            <h4>Billed To (Tenant)</h4>
+            <p class="name">{{TenantName}}</p>
+            <p>ID: {{TenantId}}</p>
+            <p>{{TenantEmail}}</p>
+        </div>
+        <div class="party">
+            <h4>Landlord / Lessor</h4>
+            <p class="name">{{LandlordName}}</p>
+            <p>ID: {{LandlordId}}</p>
+            <p>{{PropertyAddress}}</p>
+        </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="dates">
+        <div class="date-item">
+            <div class="label">Invoice Date</div>
+            <div class="value">{{InvoiceDate}}</div>
+        </div>
+        <div class="date-item">
+            <div class="label">Due Date</div>
+            <div class="value">{{DueDate}}</div>
+        </div>
+        <div class="date-item">
+            <div class="label">Lease Reference</div>
+            <div class="value">{{LeaseRef}}</div>
+        </div>
+        <div class="date-item">
+            <div class="label">Rental Period</div>
+            <div class="value">{{RentalPeriod}}</div>
+        </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="items-section">
+        <h3>Invoice Details</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th style="text-align:right">Unit Price</th>
+                    <th style="text-align:right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{LineItems}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal</span>
+            <span>R {{Subtotal}}</span>
+        </div>
+        <div class="total-row">
+            <span>VAT (0% — residential rental)</span>
+            <span>R 0.00</span>
+        </div>
+        <div class="total-row grand">
+            <span>TOTAL DUE</span>
+            <span>R {{Total}}</span>
+        </div>
+    </div>
+
+    <!-- Banking Details -->
+    <div class="banking">
+        <h4>Payment Instructions — EFT</h4>
+        <div class="banking-grid">
+            <span class="bk-label">Account Holder</span>
+            <span class="bk-value">{{LandlordName}}</span>
+            <span class="bk-label">Bank</span>
+            <span class="bk-value">{{BankName}}</span>
+            <span class="bk-label">Account Number</span>
+            <span class="bk-value">{{BankAccount}}</span>
+            <span class="bk-label">Reference</span>
+            <span class="bk-value">{{InvoiceNumber}}</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Generated by PropMate AI — AI-Powered Property Management Platform</p>
+        <p>Compliant with the South African Rental Housing Act (Act 50 of 1999)</p>
+        <p>For queries: <a href="mailto:support@propmate.co.za">support@propmate.co.za</a></p>
+    </div>
+
+</div>
+</body>
+</html>

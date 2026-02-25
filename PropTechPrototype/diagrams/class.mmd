@@ -6,8 +6,14 @@ classDiagram
       +List~Tenant~ Tenants
       +List~Property~ Properties
       +List~LeaseAgreement~ Leases
+      +List~Invoice~ Invoices
+      +List~Statement~ Statements
       +AddTenant(t: Tenant)
-      +GetProperty(id)
+      +GetPropertyById(id)
+      +AddInvoice(i: Invoice)
+      +GetInvoicesByTenantId(id)
+      +AddStatement(s: Statement)
+      +GetLatestStatementByTenantId(id)
     }
 
     class Landlord {
@@ -47,19 +53,53 @@ classDiagram
 
     class FinancialTransaction {
       <<abstract>>
+      +string Id
       +DateTime Date
       +decimal Amount
       +abstract CalculateTotal(): decimal
     }
 
+    class LineItem {
+      +string Description
+      +decimal UnitPrice
+      +int Quantity
+      +decimal Total
+    }
+
+    class PaymentStatus {
+      <<enumeration>>
+      Pending
+      Paid
+      Overdue
+      PartiallyPaid
+      Cancelled
+    }
+
     class Invoice {
+      +string LeaseId
+      +string TenantId
+      +string TenantName
+      +string PropertyAddress
       +List~LineItem~ Items
       +PaymentStatus Status
+      +DateTime DueDate
       +decimal CalculateTotal()
+      +MarkAsPaid(paidDate)
+      +MarkAsOverdue()
+      +Cancel()
     }
 
     class Statement {
+      +string TenantId
+      +string TenantName
+      +DateTime PeriodStart
+      +DateTime PeriodEnd
       +List~Invoice~ Invoices
+      +decimal OpeningBalance
+      +decimal TotalBilled
+      +decimal TotalPaid
+      +decimal ClosingBalance
+      +decimal CalculateTotal()
       +decimal CalculateBalance()
     }
 
@@ -71,6 +111,8 @@ classDiagram
       +GetPricingRecommendationAsync(propertyId)
       +GetMaintenancePredictionAsync(propertyId)
       +RunVirtualTourInspectionAsync(propertyId)
+      +IssueInvoiceAsync(leaseId)
+      +GenerateStatementAsync(tenantId)
     }
 
     class AIConfiguration {
@@ -136,6 +178,8 @@ classDiagram
     DataStore "1" -- "0..*" Tenant : manages
     DataStore "1" -- "0..*" Property : manages
     DataStore "1" -- "0..*" VirtualTour : manages
+    DataStore "1" -- "0..*" Invoice : stores
+    DataStore "1" -- "0..*" Statement : stores
     Property <|-- Room
     Property <|-- House
     LeaseAgreement "1" -- "1" Tenant : has
@@ -149,4 +193,9 @@ classDiagram
     AIPropertyAgent "1" -- "1" HuaweiAIService : uses
     AIPropertyAgent "1" -- "1" DataStore : reads
     HuaweiAIService "1" -- "1" AIConfiguration : configured-by
+    FinancialTransaction <|-- Invoice
+    FinancialTransaction <|-- Statement
+    Invoice "1" -- "0..*" LineItem : contains
+    Invoice "1" -- "1" PaymentStatus : has
     Invoice "1" -- "1" Tenant : billed-to
+    Statement "1" -- "0..*" Invoice : summarises

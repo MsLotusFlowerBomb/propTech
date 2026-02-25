@@ -14,6 +14,8 @@ namespace PropTechPrototype.Services
         private readonly List<Property> _properties = new();
         private readonly List<LeaseAgreement> _leases = new();
         private readonly List<VirtualTour> _virtualTours = new();
+        private readonly List<Invoice> _invoices = new();
+        private readonly List<Statement> _statements = new();
 
         public Landlord CurrentLandlord { get; private set; }
 
@@ -21,6 +23,8 @@ namespace PropTechPrototype.Services
         public IReadOnlyList<Property> Properties => _properties.AsReadOnly();
         public IReadOnlyList<LeaseAgreement> Leases => _leases.AsReadOnly();
         public IReadOnlyList<VirtualTour> VirtualTours => _virtualTours.AsReadOnly();
+        public IReadOnlyList<Invoice> Invoices => _invoices.AsReadOnly();
+        public IReadOnlyList<Statement> Statements => _statements.AsReadOnly();
 
         public DataStore()
         {
@@ -68,6 +72,41 @@ namespace PropTechPrototype.Services
         {
             if (string.IsNullOrWhiteSpace(propertyId)) return null;
             return _virtualTours.Find(t => string.Equals(t.PropertyId, propertyId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public void AddInvoice(Invoice invoice)
+        {
+            if (invoice == null) throw new ArgumentNullException(nameof(invoice));
+            _invoices.Add(invoice);
+        }
+
+        public IReadOnlyList<Invoice> GetInvoicesByTenantId(string tenantId)
+        {
+            if (string.IsNullOrWhiteSpace(tenantId)) return new List<Invoice>().AsReadOnly();
+            return _invoices
+                .FindAll(i => string.Equals(i.TenantId, tenantId, StringComparison.OrdinalIgnoreCase))
+                .AsReadOnly();
+        }
+
+        public void AddStatement(Statement statement)
+        {
+            if (statement == null) throw new ArgumentNullException(nameof(statement));
+            _statements.Add(statement);
+        }
+
+        public Statement? GetLatestStatementByTenantId(string tenantId)
+        {
+            if (string.IsNullOrWhiteSpace(tenantId)) return null;
+            Statement? latest = null;
+            foreach (var s in _statements)
+            {
+                if (string.Equals(s.TenantId, tenantId, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (latest == null || s.Date > latest.Date)
+                        latest = s;
+                }
+            }
+            return latest;
         }
     }
 }

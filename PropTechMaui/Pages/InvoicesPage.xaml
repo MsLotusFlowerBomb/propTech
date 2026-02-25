@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PropTechMaui.Pages.InvoicesPage"
+             Title="🧾 Invoices &amp; Billing">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="16">
+
+            <Label Text="Invoices &amp; Billing"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+            <Label Text="Issue monthly rental invoices and generate tenant account statements."
+                   FontSize="14"
+                   TextColor="Gray" />
+
+            <!-- Summary Cards -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                <Frame Grid.Column="0" BackgroundColor="#2196F3" Padding="12" CornerRadius="8">
+                    <VerticalStackLayout>
+                        <Label Text="Total Invoices" TextColor="White" FontSize="12" />
+                        <Label x:Name="TotalInvoicesLabel" Text="0" TextColor="White"
+                               FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" BackgroundColor="#4CAF50" Padding="12" CornerRadius="8">
+                    <VerticalStackLayout>
+                        <Label Text="Paid" TextColor="White" FontSize="12" />
+                        <Label x:Name="PaidLabel" Text="0" TextColor="White"
+                               FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="2" BackgroundColor="#FFC107" Padding="12" CornerRadius="8">
+                    <VerticalStackLayout>
+                        <Label Text="Pending/Overdue" TextColor="White" FontSize="12" />
+                        <Label x:Name="PendingLabel" Text="0" TextColor="White"
+                               FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Issue Invoice Section -->
+            <Frame BorderColor="#E0E0E0" CornerRadius="8" Padding="16">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Issue Invoice" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="Select Lease:" FontSize="14" />
+                    <Picker x:Name="LeasePicker"
+                            Title="— Select Lease —"
+                            ItemDisplayBinding="{Binding DisplayLabel}" />
+                    <Button Text="Issue Invoice"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            CornerRadius="6"
+                            Clicked="OnIssueInvoiceClicked" />
+                    <Label x:Name="InvoiceResultLabel"
+                           IsVisible="False"
+                           FontSize="13"
+                           TextColor="#333" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Generate Statement Section -->
+            <Frame BorderColor="#E0E0E0" CornerRadius="8" Padding="16">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Generate Statement" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="Select Tenant:" FontSize="14" />
+                    <Picker x:Name="TenantPicker"
+                            Title="— Select Tenant —"
+                            ItemDisplayBinding="{Binding FullName}" />
+                    <Button Text="Generate Statement"
+                            BackgroundColor="#757575"
+                            TextColor="White"
+                            CornerRadius="6"
+                            Clicked="OnGenerateStatementClicked" />
+                    <Label x:Name="StatementResultLabel"
+                           IsVisible="False"
+                           FontSize="13"
+                           TextColor="#333" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Invoice List -->
+            <Label Text="All Invoices" FontSize="18" FontAttributes="Bold" />
+            <CollectionView x:Name="InvoicesCollection"
+                            EmptyView="No invoices issued yet.">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BorderColor="#E0E0E0" CornerRadius="6" Padding="12" Margin="0,4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding TenantName}" FontAttributes="Bold" FontSize="14" />
+                                    <Label Text="{Binding PropertyAddress}" FontSize="12" TextColor="Gray" />
+                                    <Label Text="{Binding DateDisplay}" FontSize="11" TextColor="Gray" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                                    <Label Text="{Binding TotalDisplay}" FontAttributes="Bold" FontSize="14" />
+                                    <Label Text="{Binding Status}" FontSize="12" TextColor="Gray" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,307 @@
+@page "/invoices"
+@using PropTechWeb.Models
+@using PropTechWeb.Services
+@inject DataStore DataStore
+@inject PropertyManager Manager
+@rendermode InteractiveServer
+
+<PageTitle>Invoices &amp; Billing — PropMate AI</PageTitle>
+
+<h2>🧾 Invoices &amp; Billing</h2>
+<p>Issue monthly rental invoices and generate tenant account statements.</p>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Invoices</h5>
+                <p class="card-text display-6">@DataStore.Invoices.Count</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Paid</h5>
+                <p class="card-text display-6">@DataStore.Invoices.Count(i => i.Status == PaymentStatus.Paid)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Pending / Overdue</h5>
+                <p class="card-text display-6">
+                    @DataStore.Invoices.Count(i => i.Status == PaymentStatus.Pending || i.Status == PaymentStatus.Overdue)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Issue Invoice</h4>
+<div class="row mb-4">
+    <div class="col-md-5">
+        <label class="form-label">Lease</label>
+        <select class="form-select" @bind="_selectedLeaseId">
+            <option value="">— Select Lease —</option>
+            @foreach (var l in DataStore.Leases)
+            {
+                <option value="@l.Id">
+                    @l.Lessee.FullName — @l.LeasedProperty.Address (R @l.MonthlyRent.ToString("N0"))
+                </option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary" @onclick="IssueInvoice" disabled="@_isIssuing">
+            @if (_isIssuing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                <span> Issuing...</span>
+            }
+            else
+            {
+                <span>Issue Invoice</span>
+            }
+        </button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(_invoiceError))
+{
+    <div class="alert alert-danger">@_invoiceError</div>
+}
+
+@if (_lastInvoice != null)
+{
+    <div class="card border-primary mb-4">
+        <div class="card-header bg-primary text-white">
+            🧾 Invoice — @_lastInvoice.Id[..8]...
+        </div>
+        <div class="card-body">
+            <p><strong>Tenant:</strong> @_lastInvoice.TenantName</p>
+            <p><strong>Property:</strong> @_lastInvoice.PropertyAddress</p>
+            <p><strong>Date:</strong> @_lastInvoice.Date.ToString("d MMM yyyy")</p>
+            <p><strong>Due Date:</strong> @_lastInvoice.DueDate.ToString("d MMM yyyy")</p>
+            <p><strong>Status:</strong> <span class="badge @GetStatusBadge(_lastInvoice.Status)">@_lastInvoice.Status</span></p>
+            <table class="table table-sm mt-2">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in _lastInvoice.Items)
+                    {
+                        <tr>
+                            <td>@item.Description</td>
+                            <td class="text-end">R @item.Total.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="fw-bold">
+                        <td>TOTAL</td>
+                        <td class="text-end">R @_lastInvoice.CalculateTotal().ToString("N0")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+}
+
+<hr />
+
+<h4>Generate Statement</h4>
+<div class="row mb-4">
+    <div class="col-md-5">
+        <label class="form-label">Tenant</label>
+        <select class="form-select" @bind="_selectedTenantId">
+            <option value="">— Select Tenant —</option>
+            @foreach (var t in DataStore.Tenants)
+            {
+                <option value="@t.Id">@t.FullName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-secondary" @onclick="GenerateStatement" disabled="@_isGenerating">
+            @if (_isGenerating)
+            {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                <span> Generating...</span>
+            }
+            else
+            {
+                <span>Generate Statement</span>
+            }
+        </button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(_statementError))
+{
+    <div class="alert alert-danger">@_statementError</div>
+}
+
+@if (_lastStatement != null)
+{
+    <div class="card border-secondary mb-4">
+        <div class="card-header bg-secondary text-white">
+            📋 Account Statement — @_lastStatement.TenantName
+        </div>
+        <div class="card-body">
+            <p><strong>Period:</strong> @_lastStatement.PeriodStart.ToString("d MMM yyyy") – @_lastStatement.PeriodEnd.ToString("d MMM yyyy")</p>
+            <p><strong>Opening Balance:</strong> R @_lastStatement.OpeningBalance.ToString("N0")</p>
+            <p><strong>Total Billed:</strong> R @_lastStatement.TotalBilled.ToString("N0")</p>
+            <p><strong>Total Paid:</strong> R @_lastStatement.TotalPaid.ToString("N0")</p>
+            <p class="fs-5"><strong>Balance Due:</strong>
+                <span class="text-@(_lastStatement.CalculateBalance() > 0 ? "danger" : "success") fw-bold">
+                    R @_lastStatement.CalculateBalance().ToString("N0")
+                </span>
+            </p>
+            @if (_lastStatement.Invoices.Count == 0)
+            {
+                <p class="text-muted">No invoices in this period.</p>
+            }
+            else
+            {
+                <table class="table table-sm mt-2">
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Date</th>
+                            <th>Due</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var inv in _lastStatement.Invoices)
+                        {
+                            <tr>
+                                <td><code>@(inv.Id.Length > 8 ? inv.Id[..8] : inv.Id)...</code></td>
+                                <td>@inv.Date.ToString("d MMM")</td>
+                                <td>@inv.DueDate.ToString("d MMM")</td>
+                                <td>R @inv.CalculateTotal().ToString("N0")</td>
+                                <td><span class="badge @GetStatusBadge(inv.Status)">@inv.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+<hr />
+
+<h4>All Invoices</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Invoice ID</th>
+            <th>Tenant</th>
+            <th>Property</th>
+            <th>Date</th>
+            <th>Due</th>
+            <th>Total</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var inv in DataStore.Invoices)
+        {
+            <tr>
+                <td><code>@(inv.Id.Length > 8 ? inv.Id[..8] : inv.Id)...</code></td>
+                <td>@inv.TenantName</td>
+                <td>@inv.PropertyAddress</td>
+                <td>@inv.Date.ToString("d MMM yyyy")</td>
+                <td>@inv.DueDate.ToString("d MMM yyyy")</td>
+                <td>R @inv.CalculateTotal().ToString("N0")</td>
+                <td><span class="badge @GetStatusBadge(inv.Status)">@inv.Status</span></td>
+            </tr>
+        }
+        @if (DataStore.Invoices.Count == 0)
+        {
+            <tr><td colspan="7" class="text-muted">No invoices issued yet.</td></tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private string _selectedLeaseId = "";
+    private string _selectedTenantId = "";
+    private Invoice? _lastInvoice;
+    private Statement? _lastStatement;
+    private string? _invoiceError;
+    private string? _statementError;
+    private bool _isIssuing;
+    private bool _isGenerating;
+
+    private async Task IssueInvoice()
+    {
+        _invoiceError = null;
+        _lastInvoice = null;
+
+        if (string.IsNullOrWhiteSpace(_selectedLeaseId))
+        {
+            _invoiceError = "Please select a lease.";
+            return;
+        }
+
+        try
+        {
+            _isIssuing = true;
+            _lastInvoice = await Manager.IssueInvoiceAsync(_selectedLeaseId);
+            _selectedLeaseId = "";
+        }
+        catch (Exception)
+        {
+            _invoiceError = "An error occurred while issuing the invoice. Please check your selection and try again.";
+        }
+        finally
+        {
+            _isIssuing = false;
+        }
+    }
+
+    private async Task GenerateStatement()
+    {
+        _statementError = null;
+        _lastStatement = null;
+
+        if (string.IsNullOrWhiteSpace(_selectedTenantId))
+        {
+            _statementError = "Please select a tenant.";
+            return;
+        }
+
+        try
+        {
+            _isGenerating = true;
+            _lastStatement = await Manager.GenerateStatementAsync(_selectedTenantId);
+            _selectedTenantId = "";
+        }
+        catch (Exception)
+        {
+            _statementError = "An error occurred while generating the statement. Please check your selection and try again.";
+        }
+        finally
+        {
+            _isGenerating = false;
+        }
+    }
+
+    private static string GetStatusBadge(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Paid => "bg-success",
+        PaymentStatus.Pending => "bg-warning text-dark",
+        PaymentStatus.Overdue => "bg-danger",
+        PaymentStatus.PartiallyPaid => "bg-info text-dark",
+        PaymentStatus.Cancelled => "bg-secondary",
+        _ => "bg-secondary"
+    };
+}

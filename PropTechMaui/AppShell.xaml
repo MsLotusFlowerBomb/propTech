@@ -30,4 +30,8 @@
         <ShellContent ContentTemplate="{DataTemplate pages:VirtualToursPage}" Route="virtual-tours" />
     </FlyoutItem>
 
+    <FlyoutItem Title="Invoices" Icon="{x:Null}">
+        <ShellContent ContentTemplate="{DataTemplate pages:InvoicesPage}" Route="invoices" />
+    </FlyoutItem>
+
 </Shell>
