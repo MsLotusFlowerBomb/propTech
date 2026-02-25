@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using PropTechMaui.Models;
 
@@ -103,6 +104,94 @@ namespace PropTechMaui.Services
                 ?? throw new InvalidOperationException($"No virtual tour found for property '{propertyId}'");
 
             return await _aiAgent.AnalyseVirtualTourAsync(tour, property);
+        }
+
+        private const decimal DefaultWaterElectricityLevy = 350m;
+        private const decimal DefaultAdministrationFee = 150m;
+
+        /// <summary>
+        /// Issues a monthly rental invoice for the specified lease.
+        /// Builds line items from the lease (rent + default levies) and stores the invoice.
+        /// The levy amounts are default values; customise via a fee configuration class when needed.
+        /// </summary>
+        public Task<Invoice> IssueInvoiceAsync(string leaseId)
+        {
+            if (string.IsNullOrWhiteSpace(leaseId))
+                throw new ArgumentException("Lease ID is required", nameof(leaseId));
+
+            LeaseAgreement? lease = null;
+            foreach (var l in _store.Leases)
+            {
+                if (string.Equals(l.Id, leaseId, StringComparison.OrdinalIgnoreCase))
+                {
+                    lease = l;
+                    break;
+                }
+            }
+            if (lease == null)
+                throw new InvalidOperationException($"Lease '{leaseId}' not found");
+
+            var today = DateTime.UtcNow.Date;
+            var dueDate = new DateTime(today.Year, today.Month, 1).AddMonths(1);
+
+            var items = new List<LineItem>
+            {
+                new LineItem("Monthly Rent", lease.MonthlyRent),
+                new LineItem("Water & Electricity Levy", DefaultWaterElectricityLevy),
+                new LineItem("Administration Fee", DefaultAdministrationFee)
+            };
+
+            var invoice = new Invoice(
+                Guid.NewGuid().ToString(),
+                lease.Id,
+                lease.Lessee.Id,
+                lease.Lessee.FullName,
+                lease.LeasedProperty.Address,
+                items,
+                today,
+                dueDate);
+
+            _store.AddInvoice(invoice);
+            return Task.FromResult(invoice);
+        }
+
+        /// <summary>
+        /// Generates a monthly account statement for a tenant, summarising all invoices
+        /// for the current calendar month.
+        /// </summary>
+        public Task<Statement> GenerateStatementAsync(string tenantId)
+        {
+            if (string.IsNullOrWhiteSpace(tenantId))
+                throw new ArgumentException("Tenant ID is required", nameof(tenantId));
+
+            Tenant? tenant = null;
+            foreach (var t in _store.Tenants)
+            {
+                if (string.Equals(t.Id, tenantId, StringComparison.OrdinalIgnoreCase))
+                {
+                    tenant = t;
+                    break;
+                }
+            }
+            if (tenant == null)
+                throw new InvalidOperationException($"Tenant '{tenantId}' not found");
+
+            var today = DateTime.UtcNow.Date;
+            var periodStart = new DateTime(today.Year, today.Month, 1);
+            var periodEnd = periodStart.AddMonths(1).AddDays(-1);
+
+            var tenantInvoices = new List<Invoice>(_store.GetInvoicesByTenantId(tenantId));
+
+            var statement = new Statement(
+                Guid.NewGuid().ToString(),
+                tenant.Id,
+                tenant.FullName,
+                periodStart,
+                periodEnd,
+                tenantInvoices);
+
+            _store.AddStatement(statement);
+            return Task.FromResult(statement);
         }
     }
 }

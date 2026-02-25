@@ -85,6 +85,30 @@ namespace PropTechPrototype
             }
             Console.WriteLine();
 
+            // --- Invoice generation ---
+            Console.WriteLine("[7] Issuing monthly invoice for lease...");
+            var invoice = await manager.IssueInvoiceAsync(lease.Id);
+            Console.WriteLine($"    Invoice: {invoice.Id[..8]}...");
+            Console.WriteLine($"    Tenant: {invoice.TenantName}");
+            Console.WriteLine($"    Property: {invoice.PropertyAddress}");
+            Console.WriteLine($"    Due: {invoice.DueDate:d}");
+            Console.WriteLine($"    Status: {invoice.Status}");
+            foreach (var item in invoice.Items)
+                Console.WriteLine($"      • {item.Description}: R{item.Total:N0}");
+            Console.WriteLine($"    TOTAL: R{invoice.CalculateTotal():N0}");
+            Console.WriteLine();
+
+            // --- Statement generation ---
+            Console.WriteLine("[8] Generating tenant account statement...");
+            var statement = await manager.GenerateStatementAsync(tenant.Id);
+            Console.WriteLine($"    Statement: {statement.Id[..8]}...");
+            Console.WriteLine($"    Tenant: {statement.TenantName}");
+            Console.WriteLine($"    Period: {statement.PeriodStart:d} – {statement.PeriodEnd:d}");
+            Console.WriteLine($"    Total Billed: R{statement.TotalBilled:N0}");
+            Console.WriteLine($"    Total Paid:   R{statement.TotalPaid:N0}");
+            Console.WriteLine($"    Balance Due:  R{statement.CalculateBalance():N0}");
+            Console.WriteLine();
+
             Console.WriteLine("=== AI-powered property management session complete ===");
         }
     }
